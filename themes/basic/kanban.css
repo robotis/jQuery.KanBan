@@ -1,0 +1,333 @@
+@CHARSET "UTF-8";
+/*
+
+	MARKUP
+
+*/
+.wcolumn {
+	width: 90%;
+	margin:  0 auto;	
+}
+
+div.kanban {
+	min-height:			600px;
+	background-color: 	#2B515B;
+	/*padding: 			5px;*/
+	-moz-border-radius: 5px;
+	border-radius: 		5px;
+	overflow: hidden;
+}
+div.kanban #kb_content {
+	margin: 0 auto;
+}
+div.kanban div.kb_columns {
+	clear: both;
+}
+/*
+	HEADER
+*/
+div.kanban div#kb_header {
+	height:				32px;
+	background-color: 	#003D4D;
+	clear: both;
+	padding: 3px;
+	overflow: hidden;
+}
+div.kanban div#kb_header .kb_header_search {
+    float: right;
+    margin: 3px 8px 0 0;
+    position: relative;
+    z-index: 1;
+}
+div.kanban div#kb_header .kb_header_search #kb_search {
+	/*height: 30px;*/
+} 
+div.kanban div#kb_header .kb_header_search_submit {
+	cursor: pointer;
+  	background-color: transparent;
+    border: medium none;
+    border-radius: 0 3px 3px 0;
+    box-shadow: none;
+    color: #333333;
+    height: 24px;
+    width: 24px;
+    line-height: 28px;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 2;
+    background: url(ikons/srch_24.png) center no-repeat;
+}
+div.kb_action, div.kb_filter {
+	float: left;
+    margin-right: 5px;
+    position: relative;
+    margin-top: 1px;
+}
+div.kb_filter {
+	padding-left: 3px;
+}
+div.kb_action .kb_btn, div.kb_filter .kb_btn {
+	padding: 0 8px 0 0;
+	border-radius: 3px 3px 3px 3px;
+    color: #E3E3E3;
+    display: block;
+    float: left;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 30px;
+    text-decoration: none;
+    text-shadow: 0 1px rgba(0, 0, 0, 0.4);
+    background-color: 	#2B515B;
+}
+div#kb_filters .kb_btn {
+	height: 35px;
+}
+div.kb_action .kb_btn .kb_btn_text {
+	padding-left: 2px;
+	float: left;
+}
+.kb_btn .kb_btn_icon {
+	display: block;
+    float: left;
+    height: 30px;
+    overflow: hidden;
+    position: relative;
+    vertical-align: top;
+    width: 30px;
+    font-size: 2em;
+	color: #909090;
+	margin-left: 3px;
+	font-weight: bold;
+}
+div.kb_action.kb_add_user {
+	margin-left: 3px;
+}
+div.kb_action.kb_reload {
+	float: right;
+	padding: 0;
+	margin-right: 9px;
+}
+div.kb_action.kb_reload .kb_btn {
+	width: 20px;
+}
+/*
+	USERLIST
+*/
+div.kanban div#kb_user_list,
+div.kanban div#kb_filters {
+	background-color: #003D4D;
+    height:				32px;
+	clear: both;
+	padding: 3px;
+	overflow: hidden;
+	margin-top: 3px;
+}
+/*
+	Filters
+*/
+/*
+	Column / Queue
+*/
+div.kanban div.kb_column			
+{
+	background-color: #E3E3E3;
+    float: left;
+    min-height: 540px;
+    margin-top: 5px;
+    width: auto;
+    -moz-border-radius: 5px;
+	border-radius: 5px;
+	overflow: auto;
+	margin-bottom: 3px;
+}
+ul.kb_queue {
+	margin: 			0;
+	padding: 			0;
+	list-style: 		none;
+	width:				100%;
+	min-height:			550px;
+}
+ul.kb_queue li.ui-sortable-placeholder {
+	height: 40px !important; 
+}
+/*
+	TASK
+*/
+div.kanban li.kb_task, div.kanban form#kb_form {
+	border: 1px solid #AAA;
+	background-color: #FFF;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	margin: 1%;
+	padding: 0.5%;
+}
+div.kanban li.kb_task .kb_task_priority {
+	width: 80px;
+	height: 5px;
+	-moz-border-radius: 3px;
+	position: relative;
+    top: -3px;
+}
+div.kanban li.kb_task.kb_type_r {
+	background-color: #f4d6e5;
+	border: 1px dashed #AAA;
+}
+div.kanban li.kb_task .title {
+	font-weight: bold; 
+}
+/*
+	FORM
+*/
+div.kanban form#kb_form {
+	text-align: center;
+	background-color: #d6e5f4;
+}
+div.kanban form#kb_form input[type="text"],
+div.kanban form#kb_form textarea {
+	width: 90%;
+	border: solid 1px #85b1de;
+	margin-top: 2px;
+}
+#kb_edit_form {
+	width: 50%;
+}
+/*
+	MISC
+*/
+img.kb_user_img	{
+	 -moz-user-select: none;
+    background-color: #CCCCCC;
+    border: 1px solid #B9B9B9;
+    border-radius: 2px 2px 2px 2px;
+    color: #444444;
+    cursor: pointer;
+    display: block;
+    float: left;
+    height: 30px;
+    margin: 0 1px 1px 0;
+    position: relative;
+    width: 30px;
+    z-index: 0;
+}
+div.kanban h3 {
+	margin: 0 5px;
+	position: relative;
+	height: 48px;
+}
+div.kanban .kb_h3 {
+	padding-bottom: 10px;
+	vertical-align: middle;
+}
+div.kanban span.kb_icon {
+	font-size: 2em;
+	color: #909090;
+	margin-right: 3px;
+	font-weight: bold; 
+	margin-left: 1px;
+}
+div.kanban span.kb_icon.kb_add {
+	float: right;
+}
+div.kanban li.kb_task .kb_users,
+div.kanban #kb_overlay .kb_users {
+	height: 35px;
+}
+div.kanban div#kb_user_list ul,
+div.kanban li.kb_task .kb_users .kb_userlist,
+div.kanban #kb_overlay .kb_users .kb_userlist {
+	float: right;
+	margin: 0 3px 0 0;
+	list-style: none outside none;
+	padding: 0;
+}
+div.kanban div#kb_user_list ul {
+	float: left;
+}
+div.kanban #kb_overlay .kb_users {
+	position: absolute;
+	bottom: 5px;
+	right: 5px;
+}
+div.kanban div#kb_user_list li,
+div.kanban li.kb_task .kb_users .kb_userlist li.kb_taskuser,
+div.kanban #kb_filters li.kb_taskuser,
+div.kanban #kb_overlay .kb_users .kb_userlist li.kb_taskuser {
+	float: left;
+	text-align: center;
+    width: 35px;
+}
+div.kanban .kb_taskuserimg, div.kanban .kb_user {
+	max-height: 35px;
+    max-width: 35px;
+}
+div.kanban .loading {
+	width: 				auto;
+	height: 			60px;
+	background: 		url(ikons/ajax-loader.gif) center no-repeat;
+	background-color:   #FFF;	
+}
+/*
+	OVERLAY
+*/
+.kb_overlay_title {
+	height: 			30px !important;
+}
+.overlay_box {
+	/* overlay is hidden before loading */
+	display: none;
+
+	/* standard decorations */
+	border: 10px solid #2B515B;
+
+	/* for modern browsers use semi-transparent color on the border. nice! */
+	border: 10px solid rgba(43, 81, 91, 0.798);
+
+	/* hot CSS3 features for mozilla and webkit-based browsers (rounded borders) */
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+
+	z-index: 99999 !important;
+
+	width: 690px;
+	min-height: 200px;
+
+	overflow: auto;
+	
+	background: white;
+}
+
+.overlay_box .overlay_box_content {
+	margin: 0 auto;
+	height: 95%;
+	width: 95%;
+}
+.overlay_box #kb_overlay_close {
+	cursor: pointer;
+    display: block;
+    float: right;
+    height: 42px;
+    margin-top: 12px;
+    overflow: hidden;
+    padding-right: 1px;
+    position: absolute;
+    right: 1px;
+    text-indent: 0;
+    top: -12px;
+    width: 34px;
+	background:		transparent url(ikons/close.png) no-repeat scroll left top;
+}
+.overlay_box .overlay_box_head {
+	text-align: right; padding: 5px 10px 0 0;
+}
+.overlay_box div.flash {
+	width: auto !important;
+	margin: auto !important;
+	margin-bottom: 2px !important;
+}
+.overlay_box .ftitle, .overlay_box .fbody {
+	width: 100%;
+	clear: both;
+}

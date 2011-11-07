@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="content-language" content="is">
+	<meta http-equiv="X-UA-Compatible" content="IE=8;FF=3;OtherUA=4">
+	<title>KanBan</title>
+	<link rel="stylesheet" type="text/css" href="../themes/basic/kanban.css">
+</head>
+<body>
+<div id="kanban"></div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script type="text/javascript" src="../src/jquery.tools.min.js"></script>
+<script type="text/javascript" src="../src/jquery.kanban.js"></script>
+<script type="text/javascript" src="../src/i18n/kanban.locale-en.js"></script>
+<script>
+jQuery(document).ready(function(){
+	$('#kanban').kanban({
+		columns: [{'name': 'Tasks', 'ikon': '⊙', 'add_ikon': '+'},
+				   {'name': 'Assigned', 'ikon': '⊘', 'add_ikon': '+'},
+				   {'name': 'Working', 'ikon': '⊛', 'add_ikon': '+'},
+				   {'name': 'Testing', 'ikon': '⊕', 'add_ikon': '+'}]
+		,url: 'example.json.php'
+		,def_user_img:	'../themes/basic/ikons/male-user-small.png'
+		,prioritys:	{
+			0: {color: 'RED', name: 'A'}, 
+			1: {color: 'GREEN', name: 'B'}, 
+			2: {color: '#003C69', name: 'C'}
+		}
+		,custom_actions: {
+			rt:		{'icon': '⥮', 'text': 'RT', 'action': function() { $('#kanban').trigger('search', {'val': 'RT'}); }},
+		}
+	});
+});
+</script>	
+</body>
+</html>
