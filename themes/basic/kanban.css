@@ -4,44 +4,16 @@
 	MARKUP
 
 */
-.wcolumn {
-	width: 90%;
-	margin:  0 auto;	
-}
-
-div.kanban {
-	min-height:			600px;
-	background-color: 	#2B515B;
-	/*padding: 			5px;*/
-	-moz-border-radius: 5px;
-	border-radius: 		5px;
-	overflow: hidden;
-}
-div.kanban #kb_content {
-	margin: 0 auto;
-}
-div.kanban div.kb_columns {
-	clear: both;
-}
+.wcolumn { width: 90%; margin:  0 auto;	}
+div.kanban { min-height: 600px; background-color: #2B515B; -moz-border-radius: 5px; border-radius: 5px; overflow: hidden; }
+div.kanban #kb_content { margin: 0 auto; }
+div.kanban div.kb_columns { clear: both; }
 /*
 	HEADER
 */
-div.kanban div#kb_header {
-	height:				32px;
-	background-color: 	#003D4D;
-	clear: both;
-	padding: 3px;
-	overflow: hidden;
-}
-div.kanban div#kb_header .kb_header_search {
-    float: right;
-    margin: 3px 8px 0 0;
-    position: relative;
-    z-index: 1;
-}
-div.kanban div#kb_header .kb_header_search #kb_search {
-	/*height: 30px;*/
-} 
+div.kanban div#kb_header { height: 32px; background-color: #003D4D; clear: both; padding: 3px; overflow: hidden; }
+div.kanban div#kb_header .kb_header_search { float: right; margin: 3px 8px 0 0; position: relative; z-index: 1; }
+div.kanban div#kb_header .kb_header_search #kb_search { /*height: 30px;*/ } 
 div.kanban div#kb_header .kb_header_search_submit {
 	cursor: pointer;
   	background-color: transparent;
@@ -60,15 +32,8 @@ div.kanban div#kb_header .kb_header_search_submit {
     z-index: 2;
     background: url(ikons/srch_24.png) center no-repeat;
 }
-div.kb_action, div.kb_filter {
-	float: left;
-    margin-right: 5px;
-    position: relative;
-    margin-top: 1px;
-}
-div.kb_filter {
-	padding-left: 3px;
-}
+div.kb_action, div.kb_filter { float: left; margin-right: 5px; position: relative; margin-top: 1px;}
+div.kb_filter { padding-left: 3px; }
 div.kb_action .kb_btn, div.kb_filter .kb_btn {
 	padding: 0 8px 0 0;
 	border-radius: 3px 3px 3px 3px;
@@ -80,7 +45,7 @@ div.kb_action .kb_btn, div.kb_filter .kb_btn {
     line-height: 30px;
     text-decoration: none;
     text-shadow: 0 1px rgba(0, 0, 0, 0.4);
-    background-color: 	#2B515B;
+    background-color: #2B515B;
 }
 div#kb_filters .kb_btn {
 	height: 35px;
@@ -102,17 +67,9 @@ div.kb_action .kb_btn .kb_btn_text {
 	margin-left: 3px;
 	font-weight: bold;
 }
-div.kb_action.kb_add_user {
-	margin-left: 3px;
-}
-div.kb_action.kb_reload {
-	float: right;
-	padding: 0;
-	margin-right: 9px;
-}
-div.kb_action.kb_reload .kb_btn {
-	width: 20px;
-}
+div.kb_action.kb_add_user { margin-left: 3px; }
+div.kb_action.kb_reload { float: right; padding: 0; margin-right: 9px; }
+div.kb_action.kb_reload .kb_btn { width: 20px; }
 /*
 	USERLIST
 */
@@ -194,6 +151,9 @@ div.kanban form#kb_form textarea {
 #kb_edit_form {
 	width: 50%;
 }
+div.kb_prioritys { top: 45px; position: absolute; right: 9px;}
+div.kb_prioritys .kb_priority { float: left; margin-right: 1px; }
+div.kb_prioritys .kb_priority .show { width: 40px; height: 20px; -moz-border-radius: 3px;}
 /*
 	MISC
 */

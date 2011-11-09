@@ -9,6 +9,7 @@
 	Kanban.prototype.babel = {
 		add_user : 'Nýr notandi',
 		save : 'Vista',
+		'delete' : 'Eyða',
 		edit_task : 'Breyta verki',
 		filter: 'Sía',
 		reload: '',
