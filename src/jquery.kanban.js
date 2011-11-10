@@ -104,7 +104,6 @@
 			// Connect to triggers
 			this.set_events();
 	    },
-	    
 	    save_task : function(task) {
 			var send = {};
 			var kanban = this;
@@ -311,7 +310,19 @@
 			var mdiv = $('<div>', {'class' : kanban.config.prefix + 'task_main'});
 			// Header
 			var header = $('<div>', {'class' : kanban.config.prefix + 'overlay_header'});
-			header.append($('<h3>', {'class': kanban.config.prefix + 'overlay_title'}).text(task.title));
+			header.append($('<h3>', {'id': kanban.config.prefix + 'overlay_title'}).click(function() {
+				$(this).hide();
+				$('#' + kanban.config.prefix + 'overlay_title_input').show().focus();
+			}).text(task.title));
+			header.append(kanban.overlay_input(kanban.config.prefix + 'overlay_title', function(from) {
+				var send = {};
+				send[kanban.config.prefix + 'request'] = 'edit_title';
+				send[kanban.config.prefix + 'task'] = task.id;
+				send[kanban.config.prefix + 'title'] = $(from).val();
+				kanban.request(send, function() {
+					//
+				});
+			}).val(task.title).hide());
 			mdiv.append(header);
 			// Priority
 			var ps = $('<div>', {'class': kanban.config.prefix + 'prioritys'});
@@ -320,23 +331,8 @@
 			ps.append(inner);
 			mdiv.append(ps);
 			// Main content
-			var form = $('<form>', {'id' : kanban.config.prefix + 'edit_form', 'method' : 'post'});
-			form.append($('<input>', {'type' : 'hidden', 'value' : task.id, 'name' : 'tid'}));
-//			form.append($('<label>', {'for': 'title', 'text': 'Title', 'class': kanban.config.prefix + 'label'}));
-//			form.append($('<input>', {'type' : 'text', 'value' : task.title, 'name' : 'title', 'class' : 'ftitle'}));
-			form.append($('<textarea>', {'value' : task.body, 'name' : 'body', 'class' : 'fbody'}));
-			form.append($('<input>', {'type' : 'submit', 'value' : kanban.b('save'), 'name' : 'submit', 'class' : 'fsubmit'}));
-			form.append($('<input>', {'type' : 'submit', 'value' : kanban.b('delete'), 'name' : 'delete', 'class' : 'fsubmit'}));
-			form.submit(function() {
-				var data = {};
-				$(this).find("select,:input:not(.submit)").each(function() {
-					data[$(this).attr('name')] = $(this).val();
-				});
-				kanban.save_task(data);
-				$('#' + kanban.config.prefix + 'overlay').overlay().close();
-				return false;
-			});
-			mdiv.append($('<div>', {'class' : kanban.config.prefix + 'edit_form'}).append(form));
+			var div = $('<div>').addClass(kanban.config.prefix + 'main');
+			mdiv.append(div);
 			// Sidebar
 			var sidebar = $('<div>', {'class' : kanban.config.prefix + 'sidebar'});
 			// Members
@@ -629,6 +625,22 @@
 			} else {
 				overlay(null);
 			}
+		},
+		overlay_input : function(id, on_enter, type) {
+			var t = type ? type : '<input>';
+			var input = $(t, {'id': id + '_input'}).keydown(function(e) {
+				if(e.keyCode === 13) {
+					on_enter(this);
+				} else if(e.keyCode !== 27) {
+					// Propagate
+					return true;
+				} 
+				$(this).hide();
+				$('#' + id).show();
+				e.stopImmediatePropagation();
+				return false;
+			});
+			return input;
 		},
 		flash : function(elem, color, duration) {
 			var highlightBg = color || "#FFFF9C";
