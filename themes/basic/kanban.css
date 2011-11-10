@@ -140,9 +140,15 @@ div.kanban form#kb_form textarea {
 }
 #kb_edit_form { width: 50%; }
 .kb_edit_form {clear: both; }
-div.kb_prioritys { top: 45px; position: absolute; right: 9px;}
+.kb_sidebar {  
+	 position: absolute;
+    right: 5px;
+    top: 40px;
+    width: 250px;
+}
+div.kb_prioritys { clear: both; position: relative; top: -5px; }
 div.kb_prioritys .kb_priority { float: left; margin-right: 1px; }
-div.kb_prioritys .kb_priority .show { width: 40px; height: 20px; -moz-border-radius: 3px;}
+div.kb_prioritys .kb_priority .show { width: 40px; height: 8px; -moz-border-radius: 3px;}
 /*
 	MISC
 */
@@ -189,11 +195,6 @@ div.kanban #kb_overlay .kb_users .kb_userlist {
 	padding: 0;
 }
 div.kanban div#kb_user_list ul { float: left; }
-div.kanban #kb_overlay .kb_users {
-	position: absolute;
-	bottom: 5px;
-	right: 5px;
-}
 div.kanban div#kb_user_list li,
 div.kanban li.kb_task .kb_users .kb_userlist li.kb_taskuser,
 div.kanban #kb_filters li.kb_taskuser,
@@ -216,7 +217,7 @@ div.kanban .loading {
 	OVERLAY
 */
 .kb_overlay_header { }
-.kb_overlay_title { height: 30px !important; float: left; }
+.kb_overlay_title { height: 30px !important; float: left; margin-left: 0 !important;}
 .kb_overlay_sub_title { height: 30px !important; float: left; line-height: 22px; }
 .overlay_box {
 	/* overlay is hidden before loading */

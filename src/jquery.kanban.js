@@ -309,18 +309,21 @@
 		edit_form : function(task) {
 			var kanban = this;
 			var mdiv = $('<div>', {'class' : kanban.config.prefix + 'task_main'});
-			
+			// Header
 			var header = $('<div>', {'class' : kanban.config.prefix + 'overlay_header'});
-			header.append($('<h3>', {'class': kanban.config.prefix + 'overlay_title'}).text(kanban.b('edit_task_form')));
-			header.append($('<span>', {'class': kanban.config.prefix + 'overlay_sub_title'}).text(task.title));
+			header.append($('<h3>', {'class': kanban.config.prefix + 'overlay_title'}).text(task.title));
 			mdiv.append(header);
-			
+			// Priority
+			var ps = $('<div>', {'class': kanban.config.prefix + 'prioritys'});
+			var inner = $('<div>', {'class': kanban.config.prefix + 'priority'});
+			inner.append($('<div>', {'class': 'show'}).css("background-color", kanban.config.prioritys[task.priority].color));
+			ps.append(inner);
+			mdiv.append(ps);
+			// Main content
 			var form = $('<form>', {'id' : kanban.config.prefix + 'edit_form', 'method' : 'post'});
 			form.append($('<input>', {'type' : 'hidden', 'value' : task.id, 'name' : 'tid'}));
-			
-			form.append($('<label>', {'for': 'title', 'text': 'Title', 'class': kanban.config.prefix + 'label'}));
-			form.append($('<input>', {'type' : 'text', 'value' : task.title, 'name' : 'title', 'class' : 'ftitle'}));
-			
+//			form.append($('<label>', {'for': 'title', 'text': 'Title', 'class': kanban.config.prefix + 'label'}));
+//			form.append($('<input>', {'type' : 'text', 'value' : task.title, 'name' : 'title', 'class' : 'ftitle'}));
 			form.append($('<textarea>', {'value' : task.body, 'name' : 'body', 'class' : 'fbody'}));
 			form.append($('<input>', {'type' : 'submit', 'value' : kanban.b('save'), 'name' : 'submit', 'class' : 'fsubmit'}));
 			form.append($('<input>', {'type' : 'submit', 'value' : kanban.b('delete'), 'name' : 'delete', 'class' : 'fsubmit'}));
@@ -333,8 +336,10 @@
 				$('#' + kanban.config.prefix + 'overlay').overlay().close();
 				return false;
 			});
-			
+			mdiv.append($('<div>', {'class' : kanban.config.prefix + 'edit_form'}).append(form));
+			// Sidebar
 			var sidebar = $('<div>', {'class' : kanban.config.prefix + 'sidebar'});
+			// Members
 			var users = $('<div>', {'class' : kanban.config.prefix + 'users'});
 			var ul = $('<ul>', {'class' : kanban.config.prefix + 'userlist'});
 			$.each(task.users, function(i, user) {
@@ -343,20 +348,19 @@
 				}));
 			});
 			users.append(ul);
-			
-			var ps = $('<div>', {'class': kanban.config.prefix + 'prioritys'});
-			$.each(kanban.config.prioritys, function(i, v) {
-				var inner = $('<div>', {'class': kanban.config.prefix + 'priority'});
-				inner.append($('<div>', {'class': 'show'}).css("background-color", v.color));
-				inner.click(function() {
-					kanban.$elem.trigger('set_priority', {tid: task.id, priority: i});
-				});
-				ps.append(inner);
-			});
-			mdiv.append(ps);
-			mdiv.append($('<div>', {'class' : kanban.config.prefix + 'edit_form'}).append(form));
-//			sidebar.append(ps);
 			sidebar.append(users);
+			// Actions
+//			var ps = $('<div>', {'class': kanban.config.prefix + 'prioritys'});
+//			$.each(kanban.config.prioritys, function(i, v) {
+//				var inner = $('<div>', {'class': kanban.config.prefix + 'priority'});
+//				inner.append($('<div>', {'class': 'show'}).css("background-color", v.color));
+//				inner.click(function() {
+//					kanban.$elem.trigger('set_priority', {tid: task.id, priority: i});
+//				});
+//				ps.append(inner);
+//			});
+//			mdiv.append(ps);
+//			sidebar.append(ps);
 			mdiv.append(sidebar);
 			return mdiv;
 		},
@@ -541,7 +545,6 @@
 		},
 		show_form : function(options) {
 			var kanban = this;
-			console.log(options.type);
 			kanban.trigger_overlay(false, function() {
 				return (kanban.config[options.type]) 
 					? kanban.config[options.type](options.data)
