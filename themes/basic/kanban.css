@@ -107,9 +107,7 @@ ul.kb_queue {
 	width:				100%;
 	min-height:			550px;
 }
-ul.kb_queue li.ui-sortable-placeholder {
-	height: 40px !important; 
-}
+ul.kb_queue li.ui-sortable-placeholder { height: 40px !important; }
 /*
 	TASK
 */
@@ -128,29 +126,20 @@ div.kanban li.kb_task .kb_task_priority {
 	position: relative;
     top: -3px;
 }
-div.kanban li.kb_task.kb_type_r {
-	background-color: #f4d6e5;
-	border: 1px dashed #AAA;
-}
-div.kanban li.kb_task .title {
-	font-weight: bold; 
-}
+div.kanban li.kb_task.kb_type_r { background-color: #f4d6e5; border: 1px dashed #AAA; }
+div.kanban li.kb_task .title { font-weight: bold; }
 /*
 	FORM
 */
-div.kanban form#kb_form {
-	text-align: center;
-	background-color: #d6e5f4;
-}
+div.kanban form#kb_form { text-align: center; background-color: #d6e5f4; }
 div.kanban form#kb_form input[type="text"],
 div.kanban form#kb_form textarea {
 	width: 90%;
 	border: solid 1px #85b1de;
 	margin-top: 2px;
 }
-#kb_edit_form {
-	width: 50%;
-}
+#kb_edit_form { width: 50%; }
+.kb_edit_form {clear: both; }
 div.kb_prioritys { top: 45px; position: absolute; right: 9px;}
 div.kb_prioritys .kb_priority { float: left; margin-right: 1px; }
 div.kb_prioritys .kb_priority .show { width: 40px; height: 20px; -moz-border-radius: 3px;}
@@ -188,13 +177,9 @@ div.kanban span.kb_icon {
 	font-weight: bold; 
 	margin-left: 1px;
 }
-div.kanban span.kb_icon.kb_add {
-	float: right;
-}
+div.kanban span.kb_icon.kb_add { float: right; }
 div.kanban li.kb_task .kb_users,
-div.kanban #kb_overlay .kb_users {
-	height: 35px;
-}
+div.kanban #kb_overlay .kb_users { height: 35px; }
 div.kanban div#kb_user_list ul,
 div.kanban li.kb_task .kb_users .kb_userlist,
 div.kanban #kb_overlay .kb_users .kb_userlist {
@@ -203,9 +188,7 @@ div.kanban #kb_overlay .kb_users .kb_userlist {
 	list-style: none outside none;
 	padding: 0;
 }
-div.kanban div#kb_user_list ul {
-	float: left;
-}
+div.kanban div#kb_user_list ul { float: left; }
 div.kanban #kb_overlay .kb_users {
 	position: absolute;
 	bottom: 5px;
@@ -232,9 +215,9 @@ div.kanban .loading {
 /*
 	OVERLAY
 */
-.kb_overlay_title {
-	height: 			30px !important;
-}
+.kb_overlay_header { }
+.kb_overlay_title { height: 30px !important; float: left; }
+.kb_overlay_sub_title { height: 30px !important; float: left; line-height: 22px; }
 .overlay_box {
 	/* overlay is hidden before loading */
 	display: none;

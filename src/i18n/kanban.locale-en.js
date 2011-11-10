@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/gpl.html
 **/
 	Kanban.prototype.babel = {
-		add_user: 'Add User',
+		new_user: 'Add User',
 		save : 'Save',
 		edit_task : 'Edit Task',
 		filter: 'Filter',

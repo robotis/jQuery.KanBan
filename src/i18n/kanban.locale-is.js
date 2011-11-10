@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/gpl.html
 **/
 	Kanban.prototype.babel = {
-		add_user : 'Nýr notandi',
+		new_user : 'Nýr notandi',
 		save : 'Vista',
 		'delete' : 'Eyða',
 		edit_task : 'Breyta verki',
