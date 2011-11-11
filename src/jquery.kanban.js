@@ -307,7 +307,7 @@
 		},
 		fill_action : function(action) {
 			var kanban = this;
-			var act = $('<div>', {'class' : kanban.p('action') + ' ' + action.key});
+			var act = $('<div>', {'class' : kanban.p('action') + ' ' + kanban.p(action.key)});
 			var btn = $('<a>', {'href': '#', 'class' : kanban.p('btn')});
 			if(action.icon) {
 				btn.append($('<span>', {'class': kanban.p('btn_icon')}).append(action.icon));
@@ -483,7 +483,7 @@
 				});
 			});
 			
-			$.each(['reload', 'drop_filter',
+			$.each(['reload', 'drop_filter', 'resize',
 			        'move_task', 'drop_user', 'set_priority', 
 			        'add_filter', 'new_task', 'show_form',
 			        'new_user_form', 'filter_form'], function(i, b) {
@@ -500,6 +500,29 @@
 /**
  * Triggers
  */
+		resize: function(options) {
+	    	var cc = this.config.columns.length; 
+	    	var margin = this.config.column_margin || 3;
+	    	var uwid = this.config.width;
+	    	if(uwid > $(window).width()) {
+	    		uwid = $(window).width() - this.config.scrollbarWidth;
+	    	}
+	    	uwid -= 10; // auto-margins
+	    	var width = ((uwid / cc) - margin);
+	    	this.$elem.css({'width': uwid, 'margin': '5px auto'});
+	    	this.$elem.find(this.p('#header')).css('width', uwid);
+	    	this.$elem.find(this.p('.column')).css(
+	    			{'margin-right': margin, 'width': width}
+	    	);
+	    	this.$elem.find(this.p('.column.first')).css(
+	    			{'width': (width - margin), 'margin-left': margin, 'margin-right': margin}
+	    	);
+	    	if(width < 180) {
+	    		this.$elem.find(this.p('.task .userlist')).hide();
+	    	} else {
+	    		this.$elem.find(this.p('.task .userlist')).show();
+	    	}
+	    },
 		reload : function(options) {
 	    	var kanban 		= this;
 	    	var queues 		= $(this.p('.queue'));
@@ -695,28 +718,6 @@
 		    var originalBg = elem.css("backgroundColor");
 		    elem.effect("highlight", {color: highlightBg}, animateMs);
 		},
-	    resize: function() {
-	    	var cc = this.config.columns.length; 
-	    	var margin = this.config.column_margin || 3;
-	    	var uwid = this.config.width;
-	    	if(uwid > $(window).width()) {
-	    		uwid = $(window).width() - this.config.scrollbarWidth;
-	    	}
-	    	var width = ((uwid / cc) - margin);
-	    	this.$elem.css('width', uwid);
-	    	this.$elem.find(this.p('#header')).css('width', uwid);
-	    	this.$elem.find(this.p('.column')).css(
-	    			{'margin-right': margin, 'width': width}
-	    	);
-	    	this.$elem.find(this.p('.column.first')).css(
-	    			{'width': (width - margin), 'margin-left': margin, 'margin-right': margin}
-	    	);
-	    	if(width < 180) {
-	    		this.$elem.find(this.p('.task .userlist')).hide();
-	    	} else {
-	    		this.$elem.find(this.p('.task .userlist')).show();
-	    	}
-	    },
 	    b : function(t) {
 	    	return (typeof(this.babel[t]) == 'string') ? this.babel[t] : '!'+t+'!';
 	    },
