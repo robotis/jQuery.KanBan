@@ -111,15 +111,6 @@
 					opacity			: 0.5
 				}	
 			});
-			$('#' + kanban.config.id + ' ' + this.p('#user_form')).live('submit', function() {
-				var data = {};
-				$(this).find(":input:not(.submit)").each(function() {
-					data[$(this).attr('name')] = $(this).val();
-				});
-				kanban.save_user(data);
-				$(kanban.p('#overlay')).overlay().close();
-				return false;
-			});	
 			
 			// Setup the board
 			this.setup();
@@ -127,41 +118,6 @@
 			// Connect to triggers
 			this.set_events();
 	    },
-	    save_task : function(task) {
-			var kanban = this;
-			var elem = $('#' + task.tid);
-			elem.empty().html($('<div>', {'class' : 'loading'}));
-			var send = {
-				'request': 'edit',
-				'task' : task.tid,
-				'title' : task.title,
-				'body' : task.body,
-				'priority' : task.priority
-			};
-			kanban.request(send, function(data) {
-				elem.replaceWith(kanban.fill_task(data));
-				kanban.flash($('#' + data.id), "#2A2");
-			}, function() {
-				alert(data.error);
-				elem.replaceWith(kanban.fill_task(task));
-				kanban.flash($('#' + data.id), "#F00");
-			});
-		},
-		save_user : function(task) {
-			var send = {};
-			var kanban = this;
-			send['request'] = 'new_user';
-			send['user'] = task.uid;
-			kanban.request(send, function(user) {
-				user.src = kanban.fill_user_img(user);
-				var nu = kanban.fill_user(user, kanban.p('user'));
-				nu.draggable({
-					revert: 'invalid',
-					helper: 'clone',
-				});
-				$(kanban.p('#header_users')).append(nu);
-			});
-		},
 /*
  * HTML fill functions
  * */
@@ -404,11 +360,39 @@
 			var header = $('<div>', {'class' : kanban.p('overlay_header')});
 			header.append($('<h3>', {'class': kanban.p('overlay_title')}).text(kanban.b('new_user')));
 			mdiv.append(header);
-			var form = $('<form>', {'id' : kanban.p('user_form'), 'method' : 'post'});
+			
+			var form = $('<div>').addClass(kanban.p('main'));
 			form.append($('<label>', {'for' : 'fname', 'class' : 'flabel'}).text(kanban.b('userid')));
-			form.append($('<input>', {'type' : 'text', 'name' : 'uid', 'class' : 'fkt'}));
-			form.append($('<input>', {'type' : 'submit', 'value' : kanban.b('save'), 'name' : 'submit', 'class' : 'fsubmit'}));
+			var input = $('<input>', {'id':  kanban.p('uid_input')}).keydown(function(e) {
+				if(e.keyCode === 13) {
+					var send = {
+						'request': 'new_user',
+						'user': $(this).val()
+					};
+					kanban.request(send, function(user) {
+						user.src = kanban.fill_user_img(user);
+						var nu = kanban.fill_user(user, kanban.p('user'));
+						nu.draggable({
+							revert: 'invalid',
+							helper: 'clone',
+						});
+						$(kanban.p('#header_users')).append(nu);
+					});
+				} else if(e.keyCode !== 27) {
+					// Propagate
+					return true;
+				} 
+				e.stopImmediatePropagation();
+				return false;
+			});
+			form.append(input);
 			mdiv.append(form);
+			
+//			var form = $('<form>', {'id' : kanban.p('user_form'), 'method' : 'post'});
+//			form.append($('<label>', {'for' : 'fname', 'class' : 'flabel'}).text(kanban.b('userid')));
+//			form.append($('<input>', {'type' : 'text', 'name' : 'uid', 'class' : 'fkt'}));
+//			form.append($('<input>', {'type' : 'submit', 'value' : kanban.b('save'), 'name' : 'submit', 'class' : 'fsubmit'}));
+//			mdiv.append(form);
 			return mdiv;
 		},
 		filter_form : function() {
@@ -486,7 +470,7 @@
 			$.each(['reload', 'drop_filter', 'resize',
 			        'move_task', 'drop_user', 'set_priority', 
 			        'add_filter', 'new_task', 'show_form',
-			        'new_user_form', 'filter_form'], function(i, b) {
+			        'filter_form'], function(i, b) {
 				elem.bind(b, function(e, options) { 
 					console.log("Trigger: " + b);
 					kanban[b](options); 
@@ -685,10 +669,15 @@
 			var kanban = this;
 			var id = elem.attr('id');
 			elem.click(function() {
+				// Show other input overs
+				$(kanban.p('.overlay_input')).show();
 				$(this).hide();
+				
+				// Hide other input forms
+				$(kanban.p('.overlay_form')).hide();
 				$('#' + id + '_form').show();
 				$('#' + id + '_input').focusEnd();
-			});
+			}).addClass(kanban.p('overlay_input'));
 			var form = $('<div>', {'id': id + '_form'}).addClass(this.p('overlay_form'));
 			var t = type ? type : '<input>';
 			var input = $(t, {'id': id + '_input'}).keydown(function(e) {
