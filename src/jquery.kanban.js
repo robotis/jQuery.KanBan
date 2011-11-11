@@ -387,12 +387,6 @@
 			});
 			form.append(input);
 			mdiv.append(form);
-			
-//			var form = $('<form>', {'id' : kanban.p('user_form'), 'method' : 'post'});
-//			form.append($('<label>', {'for' : 'fname', 'class' : 'flabel'}).text(kanban.b('userid')));
-//			form.append($('<input>', {'type' : 'text', 'name' : 'uid', 'class' : 'fkt'}));
-//			form.append($('<input>', {'type' : 'submit', 'value' : kanban.b('save'), 'name' : 'submit', 'class' : 'fsubmit'}));
-//			mdiv.append(form);
 			return mdiv;
 		},
 		filter_form : function() {
