@@ -307,7 +307,7 @@
 			
 			mdiv.append(header);
 			// Priority
-			var ps = $('<div>', {'class': kanban.p('prioritys')});
+			var ps = $('<div>', {'class': kanban.p('prioritys_current')});
 			var inner = $('<div>', {'class': kanban.p('priority')});
 			inner.append($('<div>', {'class': 'show'}).css("background-color", kanban.config.prioritys[task.priority].color));
 			ps.append(inner);
@@ -346,6 +346,8 @@
 			// Sidebar
 			var sidebar = $('<div>', {'class' : kanban.p('sidebar')});
 			// Members
+			sidebar.append($('<div>').addClass(kanban.p('action')).text('Members'));
+			sidebar.append($('<hr>'));
 			var users = $('<div>', {'class' : kanban.p('users')});
 			var ul = $('<ul>', {'class' : kanban.p('userlist')});
 			$.each(task.users, function(i, user) {
@@ -355,18 +357,18 @@
 			});
 			users.append(ul);
 			sidebar.append(users);
-			// Actions
-//			var ps = $('<div>', {'class': kanban.config.prefix + 'prioritys'});
-//			$.each(kanban.config.prioritys, function(i, v) {
-//				var inner = $('<div>', {'class': kanban.config.prefix + 'priority'});
-//				inner.append($('<div>', {'class': 'show'}).css("background-color", v.color));
-//				inner.click(function() {
-//					kanban.$elem.trigger('set_priority', {tid: task.id, priority: i});
-//				});
-//				ps.append(inner);
-//			});
-//			mdiv.append(ps);
-//			sidebar.append(ps);
+			sidebar.append($('<div>').addClass(kanban.p('action')).text('Prioritys'));
+			sidebar.append($('<hr>'));
+			var ps = $('<div>', {'class': kanban.p('prioritys')});
+			$.each(kanban.config.prioritys, function(i, v) {
+				var inner = $('<div>', {'class': kanban.p('priority')});
+				inner.append($('<div>', {'class': 'show'}).css("background-color", v.color));
+				inner.click(function() {
+					kanban.$elem.trigger('set_priority', {tid: task.id, priority: i});
+				});
+				ps.append(inner);
+			});
+			sidebar.append(ps);
 			mdiv.append(sidebar);
 			return mdiv;
 		},
@@ -477,7 +479,7 @@
 			$.each(['reload', 'drop_filter', 'resize',
 			        'move_task', 'drop_user', 'set_priority', 
 			        'add_filter', 'new_task', 'show_form',
-			        'filter_form'], function(i, b) {
+			        'filter_form', 'reload_users'], function(i, b) {
 				elem.bind(b, function(e, options) { 
 					console.log("Trigger: " + b);
 					kanban[b](options); 
@@ -514,6 +516,30 @@
 	    		this.$elem.find(this.p('.task .userlist')).show();
 	    	}
 	    },
+	    reload_queue : function(options) {
+	    	kanban.request({'request':'fetch_queue', 'id': options.qid}, function(data) {
+	    		
+	    	});
+	    },
+	    reload_task : function(options) {
+	    	kanban.request({'request':'fetch_task', 'id': options.tid}, function(data) {
+	    		
+	    	});
+	    },
+	    reload_users : function(options) {
+	    	var kanban = this;
+	    	kanban.request({'request':'fetch_users'}, function(data) {
+	    		var userlist = $(this.p('#header_users'));
+	    		userlist.empty();
+				$.each(data.users, function(i, user) {
+					user.src = kanban.fill_user_img(user);
+					userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
+						var user = $(this).find('img').attr('rel');
+						kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
+					}));
+				});
+	    	});
+	    },
 		reload : function(options) {
 	    	var kanban 		= this;
 	    	var queues 		= $(this.p('.queue'));
@@ -537,14 +563,15 @@
 					});
 				}
 				if($.inArray('user', options) > -1 && data.users) {
-					userlist.empty();
-					$.each(data.users, function(i, user) {
-						user.src = kanban.fill_user_img(user);
-						userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
-							var user = $(this).find('img').attr('rel');
-							kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
-						}));
-					});
+					kanban.$elem.trigger('reload_users');
+//					userlist.empty();
+//					$.each(data.users, function(i, user) {
+//						user.src = kanban.fill_user_img(user);
+//						userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
+//							var user = $(this).find('img').attr('rel');
+//							kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
+//						}));
+//					});
 				}
 				if($.inArray('filter', options) > -1) {
 					filters.empty();
@@ -615,10 +642,20 @@
 			});
 		},
 		drop_user : function(options) {
-			// FIXME
+			this.request({
+				'request': 'drop_user',
+				'task': options.tid
+			});
 		},
-		set_priority : function() {
-			// FIXME
+		set_priority : function(options) {
+			var kanban = this;
+			this.request({
+				'request': 'set_priority',
+				'id': options.tid,
+				'value': options.priority
+			}, function(data) {
+				kanban.$elem.trigger('reload', [['task']]);
+			});
 		},
 /*
  * Utility

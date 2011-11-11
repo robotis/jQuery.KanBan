@@ -141,16 +141,13 @@ div.kanban form#kb_form textarea {
 #kb_edit_form { width: 50%; }
 
 .kb_overlay_form { width: 50%; }
-.kb_sidebar {  
-	 position: absolute;
-    right: 5px;
-    top: 40px;
-    width: 150px;
-}
-div.kb_main { clear: both; }
-div.kb_prioritys { clear: both; position: relative; top: -5px; }
-div.kb_prioritys .kb_priority { float: left; margin-right: 1px; }
-div.kb_prioritys .kb_priority .show { width: 40px; height: 8px; -moz-border-radius: 3px;}
+.kb_sidebar {  width: 50%; float: right; width: 150px; }
+.kb_sidebar hr { clear: both; }
+div.kb_main { clear: both; width: 50%; float: left; }
+div.kb_prioritys_current, div.kb_prioritys { clear: both; position: relative; top: -5px; }
+div.kb_prioritys_current .kb_priority, div.kb_prioritys .kb_priority { float: left; margin-right: 1px; }
+div.kb_prioritys_current .kb_priority .show { width: 40px; height: 8px; -moz-border-radius: 3px;}
+.kb_sidebar div.kb_prioritys .kb_priority .show { width: 40px; height: 25px; -moz-border-radius: 3px;}
 .kb_overlay_inner_input { width: 100%; }
 /*
 	MISC
