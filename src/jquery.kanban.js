@@ -16,6 +16,30 @@
 	$.fn.exists = function () {
 	    return this.length !== 0;
 	}
+	$.fn.setCursorPosition = function(position){
+	    if(this.lengh == 0) return this;
+	    return $(this).setSelection(position, position);
+	}
+	$.fn.setSelection = function(selectionStart, selectionEnd) {
+	    if(this.lengh == 0) return this;
+	    input = this[0];
+
+	    if (input.createTextRange) {
+	        var range = input.createTextRange();
+	        range.collapse(true);
+	        range.moveEnd('character', selectionEnd);
+	        range.moveStart('character', selectionStart);
+	        range.select();
+	    } else if (input.setSelectionRange) {
+	        input.focus();
+	        input.setSelectionRange(selectionStart, selectionEnd);
+	    }
+
+	    return this;
+	}
+	$.fn.focusEnd = function(){
+	    this.setCursorPosition(this.val().length);
+	}
 	
 	Kanban.prototype = {
 		defaults: {
@@ -42,10 +66,10 @@
 	    init : function() {
 	    	this.config = $.extend({}, this.defaults, this.options, this.metadata);
 	    	var kanban = this;
-	    	var action = "." + this.config.prefix + "action";
-			var queue  = "." + this.config.prefix + "queue";
-			var task   = "." + this.config.prefix + "task";
-			var add	   = "." + this.config.prefix + "add";
+	    	var action = this.p('.action');
+			var queue  = this.p('.queue');
+			var task   = this.p('.task');
+			var add	   = this.p('.add');
     	
 	    	if(!this.config.id) {
 	    		this.config.id = this.$elem.attr('id');
@@ -87,14 +111,13 @@
 					opacity			: 0.5
 				}	
 			});
-	    	
-			$('#' + kanban.config.id + ' #' + kanban.config.prefix + 'user_form').live('submit', function() {
+			$('#' + kanban.config.id + ' ' + this.p('#user_form')).live('submit', function() {
 				var data = {};
 				$(this).find(":input:not(.submit)").each(function() {
 					data[$(this).attr('name')] = $(this).val();
 				});
 				kanban.save_user(data);
-				$('#' + kanban.config.prefix + 'overlay').overlay().close();
+				$(kanban.p('#overlay')).overlay().close();
 				return false;
 			});	
 			
@@ -105,15 +128,16 @@
 			this.set_events();
 	    },
 	    save_task : function(task) {
-			var send = {};
 			var kanban = this;
 			var elem = $('#' + task.tid);
-			send[kanban.config.prefix + "request"] = kanban.config.prefix + "edit";
-			send[kanban.config.prefix + "task"] = task.tid;
-			send[kanban.config.prefix + "title"] = task.title;
-			send[kanban.config.prefix + "body"] = task.body;
-			send[kanban.config.prefix + "priority"] = task.priority;
 			elem.empty().html($('<div>', {'class' : 'loading'}));
+			var send = {
+				'request': 'edit',
+				'task' : task.tid,
+				'title' : task.title,
+				'body' : task.body,
+				'priority' : task.priority
+			};
 			kanban.request(send, function(data) {
 				elem.replaceWith(kanban.fill_task(data));
 				kanban.flash($('#' + data.id), "#2A2");
@@ -126,16 +150,16 @@
 		save_user : function(task) {
 			var send = {};
 			var kanban = this;
-			send[kanban.config.prefix + "request"] = kanban.config.prefix + "new_user";
-			send[kanban.config.prefix + "user"] = task.uid;
+			send['request'] = 'new_user';
+			send['user'] = task.uid;
 			kanban.request(send, function(user) {
 				user.src = kanban.fill_user_img(user);
-				var nu = kanban.fill_user(user, kanban.config.prefix + 'user');
+				var nu = kanban.fill_user(user, kanban.p('user'));
 				nu.draggable({
 					revert: 'invalid',
 					helper: 'clone',
 				});
-				$('#' + kanban.config.prefix + 'header_users').append(nu);
+				$(kanban.p('#header_users')).append(nu);
 			});
 		},
 /*
@@ -145,9 +169,9 @@
 			var kanban = this;
 			var li = cls
 			 	? $('<li>', {'class' : cls})
-			 	: $('<li>', {'class' : this.config.prefix + 'taskuser'});
+			 	: $('<li>', {'class' : this.p('taskuser')});
 			li.append($('<img>', {
-				'class' : this.config.prefix + 'user_img',
+				'class' : this.p('user_img'),
 				'src': user.src, 
 				'rel': user.uid,
 				'title': user.name
@@ -170,22 +194,22 @@
 		},
 		fill_queue : function(colId, col) {
 			var kanban = this;
-			var cID = kanban.config.prefix + 'column_' + colId;
-			var column = $('<div>', {'class' : kanban.config.prefix + "column"});
+			var cID = kanban.p('column_') + colId;
+			var column = $('<div>', {'class' : kanban.p('column')});
 			var title = $('<h3>');
-			title.append($('<span>', {'class' : kanban.config.prefix + 'icon'}).html(col.ikon));
-			title.append($('<span>', {'class' : kanban.config.prefix + 'h3'}).html(col.name));
-			title.append($('<span>', {'class' : kanban.config.prefix + 'icon ' + kanban.config.prefix + 'add', 
+			title.append($('<span>', {'class' : kanban.p('icon')}).html(col.ikon));
+			title.append($('<span>', {'class' : kanban.p('h3')}).html(col.name));
+			title.append($('<span>', {'class' : kanban.p('icon') + ' ' + kanban.p('add'), 
 								   	  'rel' : cID}
 			).html(col.add_ikon).click(function() { 
 				kanban.$elem.trigger('new_task', {'qid': $(this).attr('rel')});
 			}));
 			column.append(title);
 			
-			var queue = $('<ul>', {'class' : kanban.config.prefix + 'queue', 'id' : cID});
+			var queue = $('<ul>', {'class' : kanban.p('queue'), 'id' : cID});
 			queue.sortable({
-				connectWith: ['.' + kanban.config.prefix + 'queue']
-				,items: 'li.' + kanban.config.prefix + 'task' + ':not(.ui-state-disabled)'
+				connectWith: [kanban.p('.queue')]
+				,items: 'li.' + kanban.p('task') + ':not(.ui-state-disabled)'
 				,receive: function(event, ui) {
 					kanban.$elem.trigger('move_task', {tid: ui.item.attr('id'), qid: $(this).attr('id')});
 				}
@@ -199,17 +223,17 @@
 	    	var config = this.config;
 	    	var kanban = this;
 			var task = $('<li>', {
-				'class' : config.prefix + 'task',
+				'class' : kanban.p('task'),
 				'id' : data.id
 			});
 			if(data.type) {
-				task.addClass(config.prefix + 'type_' + data.type);
+				task.addClass(kanban.p('type_') + data.type);
 			}
-			var head = $('<div>', {'class' : config.prefix + 'task_head'});
+			var head = $('<div>', {'class' : kanban.p('task_head')});
 			head.append(kanban.fill_priority(data.priority));
-			head.append($('<span>', {'class' : config.prefix + 'task_title'}).html(data.title));
-			var foot = $('<div>', {'class' : config.prefix + 'users'});
-			var ul = $('<ul>', {'class' : config.prefix + 'userlist'});
+			head.append($('<span>', {'class' : kanban.p('task_title')}).html(data.title));
+			var foot = $('<div>', {'class' : kanban.p('users')});
+			var ul = $('<ul>', {'class' : kanban.p('userlist')});
 			$.each(data['users'], function(i, user) {
 				user.src = kanban.fill_user_img(user);
 				ul.append(kanban.fill_user(user));
@@ -218,8 +242,8 @@
 			task.append(head);
 			task.append(foot);
 			task.droppable({ 
-				hoverClass: kanban.config.prefix + 'drophover',
-				accept: '.' + kanban.config.prefix + 'user',
+				hoverClass: kanban.p('drophover'),
+				accept: kanban.p('.user'),
 				drop: function(e, u) {
 					var task = $(this);
 					var drag = u.draggable.find('img');
@@ -228,11 +252,11 @@
 						src : drag.attr('src')
 					};
 					var send = {};
-					send[config.prefix + "request"] = config.prefix + "add_user";
-					send[config.prefix + "task"] = task.attr('id');
-					send[config.prefix + "user"] = drag.attr('rel');
+					send['request'] = 'add_user';
+					send['task'] = task.attr('id');
+					send['user'] = drag.attr('rel');
 					kanban.request(send, function(data) {
-						task.find('.' + kanban.config.prefix + 'userlist').append(kanban.fill_user(user));
+						task.find(kanban.p('.userlist')).append(kanban.fill_user(user));
 						kanban.flash(task, "#2A2");
 					}, function() {
 						kanban.flash(task, "#F00");
@@ -247,7 +271,7 @@
 		fill_priority : function(priority) {
 			var e = this.config.prioritys[priority];
 			if(!e) return null;
-			var p = $('<div>', {'class' : this.config.prefix + 'task_priority'});
+			var p = $('<div>', {'class' : this.p('task_priority')});
 			if(e.color) p.css('background-color', e.color);
 			if(e['class']) p.addClass(e['class']);
 			return p;
@@ -255,24 +279,24 @@
 		fill_filter : function(filter) {
 			var kanban = this;
 			var div = $('<div>', {
-				'class': this.config.prefix + 'filter', 
+				'class': kanban.p('filter'), 
 				'rel': filter.filter_id,
-				'id' : this.config.prefix + 'filter_' + filter.filter_id
+				'id' : kanban.p('filter_') + filter.filter_id
 			});
-			var btn = $('<a>', {'href': '#', 'class' : this.config.prefix + 'btn'});
-			btn.append($('<span>', {'class': this.config.prefix + 'btn_icon'}).append('⊗'));
+			var btn = $('<a>', {'href': '#', 'class' : kanban.p('btn')});
+			btn.append($('<span>', {'class': kanban.p('btn_icon')}).append('⊗'));
 			switch (filter.type){
 				case 'search': 
-					btn.append($('<span>', {'class': this.config.prefix + 'btn_text'}).append(filter.val));
+					btn.append($('<span>', {'class': kanban.p('btn_text')}).append(filter.val));
 					break;
 				case 'user':
 					var img = $('<img>', {
-						'class' : this.config.prefix + 'user_img',
+						'class' : kanban.p('user_img'),
 						'src': kanban.fill_user_img(filter.val), 
 						'rel': filter.val.uid,
 						'title': filter.val.name
 					});
-					btn.append($('<span>', {'class': this.config.prefix + 'btn_text'}).append(img));
+					btn.append($('<span>', {'class': kanban.p('btn_text')}).append(img));
 					break;
 			}
 			div.append(btn);
@@ -283,15 +307,15 @@
 		},
 		fill_action : function(action) {
 			var kanban = this;
-			var act = $('<div>', {'class' : kanban.config.prefix + 'action ' + kanban.config.prefix + action.key});
-			var btn = $('<a>', {'href': '#', 'class' : kanban.config.prefix + 'btn'});
+			var act = $('<div>', {'class' : kanban.p('action') + ' ' + action.key});
+			var btn = $('<a>', {'href': '#', 'class' : kanban.p('btn')});
 			if(action.icon) {
-				btn.append($('<span>', {'class': kanban.config.prefix + 'btn_icon'}).append(action.icon));
+				btn.append($('<span>', {'class': kanban.p('btn_icon')}).append(action.icon));
 			}
 			var text = (typeof(action.text) != 'string')
 				? kanban.b(action.key)
 				: action.text;
-			if(text) btn.append($('<span>', {'class': kanban.config.prefix + 'btn_text'}).append(text));
+			if(text) btn.append($('<span>', {'class': kanban.p('btn_text')}).append(text));
 			act.append(btn);
 			act.click(function() { 
 				if(action.trigger) {
@@ -307,37 +331,51 @@
  * */
 		edit_form : function(task) {
 			var kanban = this;
-			var mdiv = $('<div>', {'class' : kanban.config.prefix + 'task_main'});
+			var mdiv = $('<div>', {'class' : kanban.p('task_main')});
 			// Header
-			var header = $('<div>', {'class' : kanban.config.prefix + 'overlay_header'});
-			header.append($('<h3>', {'id': kanban.config.prefix + 'overlay_title'}).click(function() {
-				$(this).hide();
-				$('#' + kanban.config.prefix + 'overlay_title_input').show().focus();
-			}).text(task.title));
-			header.append(kanban.overlay_input(kanban.config.prefix + 'overlay_title', function(from) {
-				var send = {};
-				send[kanban.config.prefix + 'request'] = 'edit_title';
-				send[kanban.config.prefix + 'task'] = task.id;
-				send[kanban.config.prefix + 'title'] = $(from).val();
-				kanban.request(send, function() {
-					//
-				});
-			}).val(task.title).hide());
+			var header = $('<div>', {'class' : kanban.p('overlay_header')});
+			header.append(kanban.overlay_input(
+				$('<h3>', {'id': kanban.p('task_title'), rel: task.id}).text(task.title), task.title, 
+					function(from) {
+						var send = {
+							'request': 'task_title',
+							'id': task.id,
+							'value': $(from).val()
+						};
+						kanban.request(send, null);
+					}
+				)
+			);
+			
 			mdiv.append(header);
 			// Priority
-			var ps = $('<div>', {'class': kanban.config.prefix + 'prioritys'});
-			var inner = $('<div>', {'class': kanban.config.prefix + 'priority'});
+			var ps = $('<div>', {'class': kanban.p('prioritys')});
+			var inner = $('<div>', {'class': kanban.p('priority')});
 			inner.append($('<div>', {'class': 'show'}).css("background-color", kanban.config.prioritys[task.priority].color));
 			ps.append(inner);
 			mdiv.append(ps);
 			// Main content
-			var div = $('<div>').addClass(kanban.config.prefix + 'main');
+			var div = $('<div>').addClass(kanban.p('main'));
+			div.append(kanban.overlay_input(
+				$('<a>', {'id': kanban.p('add_comment'), rel: task.id}).text('Add comment'), '', 
+					function(from) {					
+						var send = {
+							'request': 'add_comment',
+							'id': task.id,
+							'value': $(from).val()
+						};
+						kanban.request(send, null);
+					}, 
+				    '<textarea>'
+				)
+			);
+			
 			mdiv.append(div);
 			// Sidebar
-			var sidebar = $('<div>', {'class' : kanban.config.prefix + 'sidebar'});
+			var sidebar = $('<div>', {'class' : kanban.p('sidebar')});
 			// Members
-			var users = $('<div>', {'class' : kanban.config.prefix + 'users'});
-			var ul = $('<ul>', {'class' : kanban.config.prefix + 'userlist'});
+			var users = $('<div>', {'class' : kanban.p('users')});
+			var ul = $('<ul>', {'class' : kanban.p('userlist')});
 			$.each(task.users, function(i, user) {
 				ul.append(kanban.fill_user(user, null, false, function() {
 					kanban.$elem.trigger('drop_user', {uid: user.id, tid: task.id});
@@ -362,11 +400,11 @@
 		},
 		user_form : function() {
 			var kanban = this;
-			var mdiv = $('<div>', {'class' : kanban.config.prefix + 'user_main'});
-			var header = $('<div>', {'class' : kanban.config.prefix + 'overlay_header'});
-			header.append($('<h3>', {'class': kanban.config.prefix + 'overlay_title'}).text(kanban.b('new_user')));
+			var mdiv = $('<div>', {'class' : kanban.p('user_main')}); 
+			var header = $('<div>', {'class' : kanban.p('overlay_header')});
+			header.append($('<h3>', {'class': kanban.p('overlay_title')}).text(kanban.b('new_user')));
 			mdiv.append(header);
-			var form = $('<form>', {'id' : kanban.config.prefix + 'user_form', 'method' : 'post'});
+			var form = $('<form>', {'id' : kanban.p('user_form'), 'method' : 'post'});
 			form.append($('<label>', {'for' : 'fname', 'class' : 'flabel'}).text(kanban.b('userid')));
 			form.append($('<input>', {'type' : 'text', 'name' : 'uid', 'class' : 'fkt'}));
 			form.append($('<input>', {'type' : 'submit', 'value' : kanban.b('save'), 'name' : 'submit', 'class' : 'fsubmit'}));
@@ -375,11 +413,11 @@
 		},
 		filter_form : function() {
 			var kanban = this;
-			var mdiv = $('<div>', {'class' : kanban.config.prefix + 'user_main'});
-			var header = $('<div>', {'class' : kanban.config.prefix + 'overlay_header'});
-			header.append($('<h3>', {'class': kanban.config.prefix + 'overlay_title'}).text(kanban.b('filter')));
+			var mdiv = $('<div>', {'class' : kanban.p('user_main')});
+			var header = $('<div>', {'class' : kanban.p('overlay_header')});
+			header.append($('<h3>', {'class': kanban.p('overlay_title')}).text(kanban.b('filter')));
 			mdiv.append(header);
-			var form = $('<form>', {'id' : kanban.config.prefix + 'user_form', 'method' : 'post'});
+			var form = $('<form>', {'id' : kanban.p('user_form'), 'method' : 'post'});
 			// FORM HERE
 			mdiv.append(form);
 			return mdiv;
@@ -390,9 +428,8 @@
 	    setup : function() {
 	    	this.$elem.removeClass(this.config.main_class).addClass(this.config.main_class);
 	    	var kanban = this;
-	    	var content = $('<div>', {'id' : kanban.config.prefix + 'content'});
-	    	
-			var header = $('<div>', {'id' : kanban.config.prefix + 'header'});
+	    	var content = $('<div>', {'id' : kanban.p('content')});
+			var header = $('<div>', {'id' : kanban.p('header')});
 			
 			$.each(kanban.config.actions, function(i, action) {
 				if(action) {
@@ -402,11 +439,11 @@
 			});
 			
 			if(kanban.config.search) {
-				var search = $('<form>', {'class' : kanban.config.prefix + 'header_search'});
-				search.append($('<input>', {'type': 'text', 'name': kanban.config.prefix + 'search', 'id': kanban.config.prefix + 'search'}));
-				search.append($('<input>', {'type': 'submit', 'value': '','class': kanban.config.prefix + 'header_search_submit'}));
+				var search = $('<form>', {'class' : kanban.p('header_search')});
+				search.append($('<input>', {'type': 'text', 'name': 'search', 'id': kanban.p('search')}));
+				search.append($('<input>', {'type': 'submit', 'value': '','class': kanban.p('header_search_submit')}));
 				search.submit(function() { 
-					var search = $("#" + kanban.config.prefix + "search").val();
+					var search = $(kanban.p('#search')).val();
 					if(search) { kanban.$elem.trigger('add_filter', {'type':'search', 'val':search}); }
 					return false;
 				});
@@ -415,24 +452,24 @@
 			
 			content.append(header);
 			
-			var userlist = $('<div>', {'id' : kanban.config.prefix + 'user_list'});
-			var ur = $('<div>', {'class' : kanban.config.prefix + 'users'});
-			var ul = $('<ul>', {'id' : kanban.config.prefix + 'header_users'});
+			var userlist 	= $('<div>', {'id' : kanban.p('user_list')});
+			var ur 			= $('<div>', {'class' : kanban.p('users')});
+			var ul 			= $('<ul>',  {'id' : kanban.p('header_users')});
 			ur.append(ul);
 			userlist.append(ur);
 			content.append(userlist);
 			
-			var filters = $('<div>', {'id':  kanban.config.prefix + 'filters'}).hide();
+			var filters = $('<div>', {'id': kanban.p('filters')}).hide();
 			filters.hide();
 			content.append(filters);
 			
-			var columns = $('<div>', {'class' : kanban.config.prefix + "columns"});
+			var columns = $('<div>', {'class' : kanban.p('columns')});
 			var colcount = kanban.config.columns.length;
 			for(i=0; i<colcount; i++) {
 				columns.append(kanban.fill_queue(i+1, kanban.config.columns[i]));
 			}
 			content.append(columns);
-			content.append($('<div>', {'class' : kanban.config.prefix + 'overlay'}));
+			content.append($('<div>', {'class' : kanban.p('overlay')}));
 			kanban.$elem.html(content);
 			kanban.resize();
 		},
@@ -464,23 +501,21 @@
  * Triggers
  */
 		reload : function(options) {
-			var send = {};
-	    	var kanban = this;
-	    	var queues = $('.' + kanban.config.prefix + 'queue');
-	    	var userlist = $('#' + kanban.config.prefix + 'header_users');
-	    	var filters = $('#' + kanban.config.prefix + 'filters');
-
+	    	var kanban 		= this;
+	    	var queues 		= $(this.p('.queue'));
+	    	var userlist 	= $(this.p('#header_users'));
+	    	var filters 	= $(this.p('#filters'));
 	    	if(!options) { options = ['task', 'filter', 'user']; }
-	    	if($.inArray('task', options) > -1) queues.empty().html($('<div>', {'class' : 'loading'}));
+	    	if($.inArray('task', options) > -1) 
+	    		queues.empty().html($('<div>', {'class' : 'loading'}));
 	    	
-			send[kanban.config.prefix + "request"] = kanban.config.prefix + "fetch_all";
-			kanban.request(send, function(data) {
+			kanban.request({'request':'fetch_all'}, function(data) {
 				var colId = 1;
 				if($.inArray('task', options) > -1) {
 					$.each(kanban.config.columns, function() {
-						var queue = $('#' + kanban.config.prefix + 'column_' + colId).empty();
-						if(data[kanban.config.prefix + "column_" + colId]) {
-							$.each(data[kanban.config.prefix + "column_" + colId], function(i, t) {
+						var queue = $(kanban.p('#column_') + colId).empty();
+						if(data["column_" + colId]) {
+							$.each(data["column_" + colId], function(i, t) {
 								queue.append(kanban.fill_task(t));
 							});
 						}
@@ -491,7 +526,7 @@
 					userlist.empty();
 					$.each(data.users, function(i, user) {
 						user.src = kanban.fill_user_img(user);
-						userlist.append(kanban.fill_user(user, kanban.config.prefix + 'user', true, function() {
+						userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
 							var user = $(this).find('img').attr('rel');
 							kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
 						}));
@@ -511,26 +546,25 @@
 				kanban.resize();	
 			});
 		},
-//		filter_form : function(options) {
-//			this.$elem.trigger('show_form', {'type':'filter_form','data':options});
-//		},
 		drop_filter : function(options) {
 			var kanban = this;
-			var send = {};
-			send[this.config.prefix + "request"] = this.config.prefix + "drop_filter";
-			send[this.config.prefix + "filter"] = options.filter_id;
+			var send = {
+				'request' : 'drop_filter',
+				'filter' : options.filter_id
+			};
 			this.request(send, function() {
 				kanban.$elem.trigger('reload', [['task', 'filter']]);
 			});
 		},
 		add_filter : function(options) {
 			var kanban = this;
-			var send = {};
-			send[kanban.config.prefix + "request"] = kanban.config.prefix + "filter";
-			send[kanban.config.prefix + "filter"] = options.val;
-			send[kanban.config.prefix + "filter_type"] = options.type;
+			var send = {
+				'request' : 'filter',
+				'filter' : options.val,
+				'filter_type' : options.type
+			};
 			kanban.request(send, function(data) {
-				$('#' + kanban.config.prefix + 'filters').append(
+				$(this.p('#filters')).append(
 					kanban.fill_filter({
 						type: options.type, 
 						val: data.val, 
@@ -549,24 +583,22 @@
 		},
 		new_task : function(options) {
 			var kanban = this;
-			var send = {};
-			send[kanban.config.prefix + "request"] = kanban.config.prefix + "new";
-			send[kanban.config.prefix + "column"] = options.qid;
+			var send = {
+				'request': 'new',
+				'column': options.qid
+			};
 			kanban.request(send, function(data) {
 				$('ul#' + options.qid).append(
 					kanban.fill_task(data)
 				);
 			});
 		},
-//		new_user_form : function(options) {
-//			this.$elem.trigger('show_form', {'type':'user_form','data':options});
-//		},
 		move_task : function(options) {
-			var send = {};
-			send[this.config.prefix + "request"] = this.config.prefix + "move";
-			send[this.config.prefix + "task"] = options.tid;
-			send[this.config.prefix + "column"] = options.qid;
-			this.request(send, null);
+			this.request({
+				'request': 'move',
+				'task': options.tid,
+				'column': options.qid
+			});
 		},
 		drop_user : function(options) {
 			// FIXME
@@ -599,7 +631,7 @@
 		trigger_overlay : function(send, callback) {
 			var kanban = this;
 			function overlay(data) {
-				var id = kanban.config.prefix + "overlay";
+				var id = kanban.p("overlay");
 				var odiv = $('<div>', {'id' : id, 'class': 'overlay_box'});
 				var ocontent = $('<div>', {'class': 'overlay_box_content'});
 				var ohead = $('<div>', {'class': 'overlay_box_head'});
@@ -626,21 +658,36 @@
 				overlay(null);
 			}
 		},
-		overlay_input : function(id, on_enter, type) {
+		overlay_input : function(elem, text, on_enter, type) {
+			var kanban = this;
+			var id = elem.attr('id');
+			elem.click(function() {
+				$(this).hide();
+				$('#' + id + '_form').show();
+				$('#' + id + '_input').focusEnd();
+			});
+			var form = $('<div>', {'id': id + '_form'}).addClass(this.p('overlay_form'));
 			var t = type ? type : '<input>';
 			var input = $(t, {'id': id + '_input'}).keydown(function(e) {
 				if(e.keyCode === 13) {
-					on_enter(this);
+					if(on_enter) on_enter(this);
 				} else if(e.keyCode !== 27) {
 					// Propagate
 					return true;
 				} 
-				$(this).hide();
+				$('#' + id + '_form').hide();
 				$('#' + id).show();
 				e.stopImmediatePropagation();
 				return false;
 			});
-			return input;
+			if(text) input.val(text);
+			var wrap = $('<div>');
+			wrap.append(elem);
+			form.append(input);
+//			form.append($('<span class="kb_icon kb_overlay_save" rel="kb_column_2">+</span>'));
+			form.hide();
+			wrap.append(form);
+			return wrap;
 		},
 		flash : function(elem, color, duration) {
 			var highlightBg = color || "#FFFF9C";
@@ -657,22 +704,37 @@
 	    	}
 	    	var width = ((uwid / cc) - margin);
 	    	this.$elem.css('width', uwid);
-	    	this.$elem.find('#' + this.config.prefix + 'header').css('width', uwid);
-	    	this.$elem.find('.' + this.config.prefix + 'column').css(
+	    	this.$elem.find(this.p('#header')).css('width', uwid);
+	    	this.$elem.find(this.p('.column')).css(
 	    			{'margin-right': margin, 'width': width}
 	    	);
-	    	this.$elem.find('.' + this.config.prefix + 'column.first').css(
+	    	this.$elem.find(this.p('.column.first')).css(
 	    			{'width': (width - margin), 'margin-left': margin, 'margin-right': margin}
 	    	);
 	    	if(width < 180) {
-	    		this.$elem.find('.' + this.config.prefix + 'task .' + this.config.prefix + 'userlist').hide();
+	    		this.$elem.find(this.p('.task .userlist')).hide();
 	    	} else {
-	    		this.$elem.find('.' + this.config.prefix + 'task .' + this.config.prefix + 'userlist').show();
+	    		this.$elem.find(this.p('.task .userlist')).show();
 	    	}
 	    },
 	    b : function(t) {
 	    	return (typeof(this.babel[t]) == 'string') ? this.babel[t] : '!'+t+'!';
 	    },
+	    p : function(t) {
+	    	if(this.config.prefix) {
+	    		var a = t.split(' ');
+	    		for (var i = 0; i < a.length; i++) {
+    			  var m = /^([\.#])?(.+)/.exec(a[i]);
+    			  if (m && m[1]) {
+    				  a[i] = m[1] + this.config.prefix + m[2];
+    			  } else {
+    				  a[i] = this.config.prefix + a[i]; 
+    			  }
+    			}
+	    		return a.join(' ');
+	    	}
+	    	return t;
+	    }
 	};
 	
 	Kanban.defaults = Kanban.prototype.defaults;

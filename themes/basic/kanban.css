@@ -139,6 +139,7 @@ div.kanban form#kb_form textarea {
 	margin-top: 2px;
 }
 #kb_edit_form { width: 50%; }
+
 .kb_edit_form {clear: both; }
 .kb_sidebar {  
 	 position: absolute;
@@ -146,6 +147,7 @@ div.kanban form#kb_form textarea {
     top: 40px;
     width: 250px;
 }
+div.kb_main { clear: both; }
 div.kb_prioritys { clear: both; position: relative; top: -5px; }
 div.kb_prioritys .kb_priority { float: left; margin-right: 1px; }
 div.kb_prioritys .kb_priority .show { width: 40px; height: 8px; -moz-border-radius: 3px;}
@@ -217,7 +219,8 @@ div.kanban .loading {
 	OVERLAY
 */
 .kb_overlay_header { }
-#kb_overlay_title { height: 30px !important; float: left; margin-left: 0 !important;}
+.kb_overlay_form { margin-bottom: 5px; }
+#kb_overlay_title, #kb_task_title { height: 30px !important; float: left; margin-left: 0 !important;}
 .kb_overlay_sub_title { height: 30px !important; float: left; line-height: 22px; }
 .overlay_box {
 	/* overlay is hidden before loading */
