@@ -192,7 +192,9 @@
 			var ul = $('<ul>', {'class' : kanban.p('userlist')});
 			$.each(data['users'], function(i, user) {
 				user.src = kanban.fill_user_img(user);
-				ul.append(kanban.fill_user(user));
+				if(i < 6) {
+					ul.append(kanban.fill_user(user));
+				}
 			});
 			foot.append(ul);
 			task.append(head);
@@ -312,6 +314,20 @@
 			mdiv.append(ps);
 			// Main content
 			var div = $('<div>').addClass(kanban.p('main'));
+			var desc = task.body ? task.body : 'Add description';
+			div.append(kanban.overlay_input(
+				$('<a>', {'id': kanban.p('add_description'), rel: task.id}).text(desc), desc, 
+					function(from) {					
+						var send = {
+							'request': 'add_description',
+							'id': task.id,
+							'value': $(from).val()
+						};
+						kanban.request(send, null);
+					}, 
+				    '<textarea>'
+				)
+			);
 			div.append(kanban.overlay_input(
 				$('<a>', {'id': kanban.p('add_comment'), rel: task.id}).text('Add comment'), '', 
 					function(from) {					
@@ -378,12 +394,9 @@
 						});
 						$(kanban.p('#header_users')).append(nu);
 					});
-				} else if(e.keyCode !== 27) {
-					// Propagate
-					return true;
 				} 
-				e.stopImmediatePropagation();
-				return false;
+				// Propagate
+				return true;
 			});
 			form.append(input);
 			mdiv.append(form);
@@ -685,7 +698,7 @@
 				$('#' + id).show();
 				e.stopImmediatePropagation();
 				return false;
-			});
+			}).addClass(this.p('overlay_inner_input'));
 			if(text) input.val(text);
 			var wrap = $('<div>');
 			wrap.append(elem);
