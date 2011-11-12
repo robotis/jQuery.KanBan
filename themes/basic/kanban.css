@@ -32,7 +32,7 @@ div.kanban div#kb_header .kb_header_search_submit {
     z-index: 2;
     background: url(ikons/srch_24.png) center no-repeat;
 }
-div.kb_action, div.kb_filter { float: left; margin-right: 5px; position: relative; margin-top: 1px;}
+div.kb_action, div.kb_filter { float: left; margin-right: 5px; position: relative; margin-top: 1px; }
 div.kb_filter { padding-left: 3px; }
 div.kb_action .kb_btn, div.kb_filter .kb_btn {
 	padding: 0 8px 0 0;
@@ -138,16 +138,16 @@ div.kanban form#kb_form textarea {
 	border: solid 1px #85b1de;
 	margin-top: 2px;
 }
-#kb_edit_form { width: 50%; }
 
-.kb_overlay_form { width: 50%; }
-.kb_sidebar {  width: 50%; float: right; width: 150px; }
+.kb_sidebar {  width: 30%; float: right; }
 .kb_sidebar hr { clear: both; }
-div.kb_main { clear: both; width: 50%; float: left; }
+.kb_sidebar .kb_action { clear: both; }
+div.kb_main { clear: both; width: 70%; float: left; }
 div.kb_prioritys_current, div.kb_prioritys { clear: both; position: relative; top: -5px; }
 div.kb_prioritys_current .kb_priority, div.kb_prioritys .kb_priority { float: left; margin-right: 1px; }
 div.kb_prioritys_current .kb_priority .show { width: 40px; height: 8px; -moz-border-radius: 3px;}
 .kb_sidebar div.kb_prioritys .kb_priority .show { width: 40px; height: 25px; -moz-border-radius: 3px;}
+a.kb_overlay_input {text-decoration: none; }
 .kb_overlay_inner_input { width: 100%; }
 /*
 	MISC

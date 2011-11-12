@@ -326,7 +326,8 @@
 			// Priority
 			var ps = $('<div>', {'class': kanban.p('prioritys_current')});
 			var inner = $('<div>', {'class': kanban.p('priority')});
-			inner.append($('<div>', {'class': 'show'}).css("background-color", kanban.config.prioritys[task.priority].color));
+			inner.append($('<div>', {'class': 'show', 'id': kanban.p('current_priority')})
+						.css("background-color", kanban.config.prioritys[task.priority].color));
 			ps.append(inner);
 			mdiv.append(ps);
 			// Main content
@@ -378,14 +379,19 @@
 			sidebar.append($('<hr>'));
 			var ps = $('<div>', {'class': kanban.p('prioritys')});
 			$.each(kanban.config.prioritys, function(i, v) {
-				var inner = $('<div>', {'class': kanban.p('priority')});
+				var inner = $('<div>', {'class': kanban.p('priority'), 'rel': v.color});
 				inner.append($('<div>', {'class': 'show'}).css("background-color", v.color));
 				inner.click(function() {
+					var color = $(this).attr("rel");
+					$(kanban.p('#current_priority')).css("background-color", color);
 					kanban.$elem.trigger('set_priority', {tid: task.id, priority: i});
 				});
 				ps.append(inner);
 			});
 			sidebar.append(ps);
+			// Members
+			sidebar.append($('<div>').addClass(kanban.p('action')).text('Actions'));
+			sidebar.append($('<hr>'));
 			mdiv.append(sidebar);
 			return mdiv;
 		},
