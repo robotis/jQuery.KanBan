@@ -226,7 +226,16 @@
 				}
 			});
 			task.click(function() {
-				kanban.$elem.trigger('show_form', {'type': 'edit_form', 'data': data});
+				var send = {
+					'request': 'fetch_task',
+					'id': data.id
+				};
+				kanban.request(send, function(t) {
+					$.each(t['users'], function(i, user) {
+						user.src = kanban.fill_user_img(user);
+					});
+					kanban.$elem.trigger('show_form', {'type': 'edit_form', 'data': t});
+				});
 			});
 			return task;
 		},
@@ -297,14 +306,18 @@
 			// Header
 			var header = $('<div>', {'class' : kanban.p('overlay_header')});
 			header.append(kanban.overlay_input(
-				$('<h3>', {'id': kanban.p('task_title'), rel: task.id}).text(task.title), task.title, 
+				$('<h3>', {'id': kanban.p('set_title'), rel: task.id}).text(task.title), task.title, 
 					function(from) {
+						var val = $(from).val();
 						var send = {
-							'request': 'task_title',
+							'request': 'set_title',
 							'id': task.id,
-							'value': $(from).val()
+							'value': val
 						};
-						kanban.request(send, null);
+						kanban.request(send, function() {
+							kanban.$elem.trigger('reload_task', {id: task.id});
+							$(kanban.p('#set_title')).text(val);
+						});
 					}
 				)
 			);
@@ -621,7 +634,7 @@
 				'filter_type' : options.type
 			};
 			kanban.request(send, function(data) {
-				$(this.p('#filters')).append(
+				$(kanban.p('#filters')).append(
 					kanban.fill_filter({
 						type: options.type, 
 						val: data.val, 

@@ -218,7 +218,7 @@ div.kanban .loading {
 */
 .kb_overlay_header { }
 .kb_overlay_form { margin-bottom: 5px; }
-#kb_overlay_title, #kb_task_title { height: 30px !important; float: left; margin-left: 0 !important;}
+#kb_overlay_title, #kb_set_title { height: 30px !important; float: left; margin-left: 0 !important;}
 .kb_overlay_sub_title { height: 30px !important; float: left; line-height: 22px; }
 .overlay_box {
 	/* overlay is hidden before loading */
