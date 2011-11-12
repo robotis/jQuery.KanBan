@@ -138,7 +138,7 @@
 			if(draggable) {
 				li.draggable({
 					revert: 'invalid',
-					helper: 'clone',
+					helper: 'clone'
 				});
 			}
 			return li;
@@ -175,16 +175,8 @@
 			column.append(queue);
 			return column;
 		},
-	    fill_task : function(data) {
-	    	var config = this.config;
-	    	var kanban = this;
-			var task = $('<li>', {
-				'class' : kanban.p('task'),
-				'id' : data.id
-			});
-			if(data.type) {
-				task.addClass(kanban.p('type_') + data.type);
-			}
+		fill_task_inner : function(task, data) {
+			var kanban = this;
 			var head = $('<div>', {'class' : kanban.p('task_head')});
 			head.append(kanban.fill_priority(data.priority));
 			head.append($('<span>', {'class' : kanban.p('task_title')}).html(data.title));
@@ -199,6 +191,18 @@
 			foot.append(ul);
 			task.append(head);
 			task.append(foot);
+		},
+	    fill_task : function(data) {
+	    	var config = this.config;
+	    	var kanban = this;
+			var task = $('<li>', {
+				'class' : kanban.p('task'),
+				'id' : data.id
+			});
+			if(data.type) {
+				task.addClass(kanban.p('type_') + data.type);
+			}
+			kanban.fill_task_inner(task, data);
 			task.droppable({ 
 				hoverClass: kanban.p('drophover'),
 				accept: kanban.p('.user'),
@@ -479,7 +483,8 @@
 			$.each(['reload', 'drop_filter', 'resize',
 			        'move_task', 'drop_user', 'set_priority', 
 			        'add_filter', 'new_task', 'show_form',
-			        'filter_form', 'reload_users'], function(i, b) {
+			        'filter_form', 'reload_users', 'reload_queue',
+			        'reload_task'], function(i, b) {
 				elem.bind(b, function(e, options) { 
 					console.log("Trigger: " + b);
 					kanban[b](options); 
@@ -517,21 +522,33 @@
 	    	}
 	    },
 	    reload_queue : function(options) {
-	    	kanban.request({'request':'fetch_queue', 'id': options.qid}, function(data) {
-	    		
+	    	var kanban = this;
+	    	var queue = $(kanban.p('#column_') + options.id);
+	    	queue.empty().html($('<div>', {'class' : 'loading'}));
+	    	kanban.request({'request':'fetch_queue', 'id': options.id}, function(data) {
+	    		queue.empty();
+				if(data) {
+					$.each(data, function(i, t) {
+						queue.append(kanban.fill_task(t));
+					});
+				}
 	    	});
 	    },
 	    reload_task : function(options) {
-	    	kanban.request({'request':'fetch_task', 'id': options.tid}, function(data) {
-	    		
+	    	var kanban = this;
+	    	var task = $('#' + options.id);
+	    	task.empty().html($('<div>', {'class' : 'loading'}));
+	    	kanban.request({'request':'fetch_task', 'id': options.id}, function(data) {
+	    		task.empty();
+	    		kanban.fill_task_inner(task, data);
 	    	});
 	    },
 	    reload_users : function(options) {
 	    	var kanban = this;
+	    	var userlist = $(kanban.p('#header_users'));
+	    	userlist.empty();
 	    	kanban.request({'request':'fetch_users'}, function(data) {
-	    		var userlist = $(this.p('#header_users'));
-	    		userlist.empty();
-				$.each(data.users, function(i, user) {
+				$.each(data, function(i, user) {
 					user.src = kanban.fill_user_img(user);
 					userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
 						var user = $(this).find('img').attr('rel');
@@ -563,15 +580,14 @@
 					});
 				}
 				if($.inArray('user', options) > -1 && data.users) {
-					kanban.$elem.trigger('reload_users');
-//					userlist.empty();
-//					$.each(data.users, function(i, user) {
-//						user.src = kanban.fill_user_img(user);
-//						userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
-//							var user = $(this).find('img').attr('rel');
-//							kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
-//						}));
-//					});
+					userlist.empty();
+					$.each(data.users, function(i, user) {
+						user.src = kanban.fill_user_img(user);
+						userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
+							var user = $(this).find('img').attr('rel');
+							kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
+						}));
+					});
 				}
 				if($.inArray('filter', options) > -1) {
 					filters.empty();
@@ -654,7 +670,7 @@
 				'id': options.tid,
 				'value': options.priority
 			}, function(data) {
-				kanban.$elem.trigger('reload', [['task']]);
+				kanban.$elem.trigger('reload_task', {id: options.tid});
 			});
 		},
 /*
