@@ -328,7 +328,7 @@
 			mdiv.append(ps);
 			// Main content
 			var div = $('<div>').addClass(kanban.p('main'));
-			div.append($('<div>').addClass(kanban.p('action')).text('Description'));
+			div.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Description')));
 			div.append($('<hr>'));
 			var desc = task.body ? task.body : kanban.b('Add description');
 			div.append(kanban.overlay_input(
@@ -344,10 +344,10 @@
 				    '<textarea>'
 				)
 			);
-			div.append($('<div>').addClass(kanban.p('action')).text('Comments'));
+			div.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Comments')));
 			div.append($('<hr>'));
 			div.append(kanban.overlay_input(
-				$('<a>', {'id': kanban.p('add_comment'), rel: task.id}).text('Add comment'), '', 
+				$('<a>', {'id': kanban.p('add_comment'), rel: task.id}).text(kanban.b('Add comment')), '', 
 					function(from) {					
 						var send = {
 							'request': 'add_comment',
@@ -364,7 +364,7 @@
 			// Sidebar
 			var sidebar = $('<div>', {'class' : kanban.p('sidebar')});
 			// Members
-			sidebar.append($('<div>').addClass(kanban.p('action')).text('Members'));
+			sidebar.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Members')));
 			sidebar.append($('<hr>'));
 			var users = $('<div>', {'class' : kanban.p('users')});
 			var ul = $('<ul>', {'class' : kanban.p('userlist')});
@@ -375,8 +375,10 @@
 			});
 			users.append(ul);
 			sidebar.append(users);
-			sidebar.append($('<div>').addClass(kanban.p('action')).text('Prioritys'));
+			// Members
+			sidebar.append($('<div>').addClass(kanban.p('separator')).text('Actions'));
 			sidebar.append($('<hr>'));
+			sidebar.append(kanban.fill_action({'key': 'set_priority', 'icon': '◱'}));
 			var ps = $('<div>', {'class': kanban.p('prioritys')});
 			$.each(kanban.config.prioritys, function(i, v) {
 				var inner = $('<div>', {'class': kanban.p('priority'), 'rel': v.color});
@@ -389,9 +391,7 @@
 				ps.append(inner);
 			});
 			sidebar.append(ps);
-			// Members
-			sidebar.append($('<div>').addClass(kanban.p('action')).text('Actions'));
-			sidebar.append($('<hr>'));
+			sidebar.append(kanban.fill_action({'key': 'archive', 'icon': '◧'}));
 			mdiv.append(sidebar);
 			return mdiv;
 		},
