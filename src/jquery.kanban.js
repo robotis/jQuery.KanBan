@@ -332,6 +332,8 @@
 			mdiv.append(ps);
 			// Main content
 			var div = $('<div>').addClass(kanban.p('main'));
+			div.append($('<div>').addClass(kanban.p('action')).text('Description'));
+			div.append($('<hr>'));
 			var desc = task.body ? task.body : 'Add description';
 			div.append(kanban.overlay_input(
 				$('<a>', {'id': kanban.p('add_description'), rel: task.id}).text(desc), desc, 
@@ -346,6 +348,8 @@
 				    '<textarea>'
 				)
 			);
+			div.append($('<div>').addClass(kanban.p('action')).text('Comments'));
+			div.append($('<hr>'));
 			div.append(kanban.overlay_input(
 				$('<a>', {'id': kanban.p('add_comment'), rel: task.id}).text('Add comment'), '', 
 					function(from) {					
