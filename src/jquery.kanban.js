@@ -93,10 +93,6 @@
 	    	}
 	    	this.config.scrollbarWidth = scrollbarWidth();
 	    	
-	    	if(!this.babel) {
-	    		alert('No localization loaded, aborting...');
-	    		return null;
-	    	}
 	    	$.extend(this.config.actions, this.config.custom_actions);
 	    	// Overlay defaults 
 	    	$.extend(this.config.overlay, {
@@ -334,7 +330,7 @@
 			var div = $('<div>').addClass(kanban.p('main'));
 			div.append($('<div>').addClass(kanban.p('action')).text('Description'));
 			div.append($('<hr>'));
-			var desc = task.body ? task.body : 'Add description';
+			var desc = task.body ? task.body : kanban.b('Add description');
 			div.append(kanban.overlay_input(
 				$('<a>', {'id': kanban.p('add_description'), rel: task.id}).text(desc), desc, 
 					function(from) {					
@@ -403,11 +399,11 @@
 			var kanban = this;
 			var mdiv = $('<div>', {'class' : kanban.p('user_main')}); 
 			var header = $('<div>', {'class' : kanban.p('overlay_header')});
-			header.append($('<h3>', {'class': kanban.p('overlay_title')}).text(kanban.b('new_user')));
+			header.append($('<h3>', {'class': kanban.p('overlay_title')}).text(kanban.b('New user')));
 			mdiv.append(header);
 			
 			var form = $('<div>').addClass(kanban.p('main'));
-			form.append($('<label>', {'for' : 'fname', 'class' : 'flabel'}).text(kanban.b('userid')));
+			form.append($('<label>', {'for' : 'fname', 'class' : 'flabel'}).text(kanban.b('User ID')));
 			var input = $('<input>', {'id':  kanban.p('uid_input')}).keydown(function(e) {
 				if(e.keyCode === 13) {
 					var send = {
@@ -435,7 +431,7 @@
 			var kanban = this;
 			var mdiv = $('<div>', {'class' : kanban.p('user_main')});
 			var header = $('<div>', {'class' : kanban.p('overlay_header')});
-			header.append($('<h3>', {'class': kanban.p('overlay_title')}).text(kanban.b('filter')));
+			header.append($('<h3>', {'class': kanban.p('overlay_title')}).text(kanban.b('Filter')));
 			mdiv.append(header);
 			var form = $('<form>', {'id' : kanban.p('user_form'), 'method' : 'post'});
 			// FORM HERE
@@ -791,6 +787,7 @@
 		    elem.effect("highlight", {color: highlightBg}, animateMs);
 		},
 	    b : function(t) {
+			if(!this.babel) return t;
 	    	return (typeof(this.babel[t]) == 'string') ? this.babel[t] : '!'+t+'!';
 	    },
 	    p : function(t) {
