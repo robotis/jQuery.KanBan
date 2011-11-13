@@ -44,11 +44,11 @@
 	Kanban.prototype = {
 		defaults: {
 	    	main_class: 	'kanban',
-	    	prefix:			"kb_",
-			id: 			"",
-			url: 			"",
-			def_user_img:	"male-user-small.png",
-			img_dir:		"",
+	    	prefix:			'kb_',
+			id: 			'',
+			url: 			'',
+			def_user_img:	'',
+			img_dir:		'',
 			columns:		[],
 			prioritys:		{},
 			overlay:		{},
@@ -113,6 +113,9 @@
 			
 			// Connect to triggers
 			this.set_events();
+			
+			// OK
+			this.$elem.trigger('initComplete');
 	    },
 /*
  * HTML fill functions
@@ -532,6 +535,7 @@
  * Triggers
  */
 		resize: function(options) {
+			this.$elem.trigger('onResize');
 	    	var cc = this.config.columns.length; 
 	    	var margin = this.config.column_margin || 3;
 	    	var uwid = this.config.width;
@@ -587,6 +591,7 @@
 	    	});
 	    },
 		reload : function(options) {
+	    	this.$elem.trigger('onReload');
 	    	var kanban 		= this;
 	    	var queues 		= $(this.p('.queue_inner'));
 	    	var userlist 	= $(this.p('#header_users'));
@@ -629,6 +634,7 @@
 			});
 		},
 		drop_filter : function(options) {
+			this.$elem.trigger('onDropFilter');
 			var kanban = this;
 			var send = {
 				'request' : 'drop_filter',
@@ -639,6 +645,7 @@
 			});
 		},
 		add_filter : function(options) {
+			this.$elem.trigger('onAddFilter');
 			var kanban = this;
 			var send = {
 				'request' : 'filter',
@@ -664,6 +671,7 @@
 			});
 		},
 		new_task : function(options) {
+			this.$elem.trigger('onNewTask');
 			var kanban = this;
 			var send = {
 				'request': 'new_task',
@@ -676,6 +684,7 @@
 			});
 		},
 		move_task : function(options) {
+			this.$elem.trigger('onMove');
 			this.request({
 				'request': 'move',
 				'task': options.tid,
@@ -683,12 +692,14 @@
 			});
 		},
 		drop_user : function(options) {
+			this.$elem.trigger('onDropUser');
 			this.request({
 				'request': 'drop_user',
 				'task': options.tid
 			});
 		},
 		set_priority : function(options) {
+			this.$elem.trigger('onSetPriority');
 			var kanban = this;
 			this.request({
 				'request': 'set_priority',
