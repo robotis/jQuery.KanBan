@@ -724,6 +724,7 @@
 			var kanban = this;
 			function overlay(data) {
 				var id = kanban.p("overlay");
+				var ol = $('.' + id);
 				var odiv = $('<div>', {'id' : id, 'class': kanban.p('overlay_box')});
 				var ocontent = $('<div>', {'class': kanban.p('overlay_box_content')});
 				var ohead = $('<div>', {'class': kanban.p('overlay_box_head')});
@@ -733,14 +734,15 @@
 				
 				ocontent.append(ohead);
 				var content = $('<div>', {'class' : kanban.p('overlay_content')});
-				
 				content.html(callback(data));
 				ocontent.append(content);
 				odiv.append(ocontent);
-				$('.' + id).html(odiv);
+				ol.html(odiv);
 				
 				kanban.config.overlay.close = $('#' + clId);
-				$('#' + id).overlay(kanban.config.overlay).load();
+				$('#' + id).overlay(kanban.config.overlay).bind('onClose', function() {
+					ol.empty();
+				}).load();
 			}
 			if(send) {
 				kanban.request(send, function(data) {
