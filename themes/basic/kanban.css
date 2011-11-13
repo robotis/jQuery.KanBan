@@ -139,7 +139,7 @@ div.kanban li.kb_task .title { font-weight: bold; }
 .kb_sidebar .kb_action .kb_btn { width: 98%; }
 .kb_sidebar .kb_action .kb_btn .kb_btn_icon { line-height: 25px; }
 div.kb_main { clear: both; width: 69%; float: left; }
-div.kb_prioritys_current { clear: both; position: relative; top: -5px; }
+div.kb_prioritys_current { clear: both; position: relative; }
 div.kb_prioritys { clear: both; position: relative; padding-top: 2px; height: 24px; }
 div.kb_prioritys_current .kb_priority { float: left; margin-right: 1px; }
 div.kb_prioritys .kb_priority { float: left; margin-right: 1px; height: 26px;}
@@ -218,7 +218,7 @@ div.kanban .loading {
 */
 .kb_overlay_header { }
 .kb_overlay_form { margin-bottom: 5px; }
-#kb_overlay_title, #kb_set_title { height: 30px !important; float: left; margin-left: 0 !important;}
+#kb_overlay_title, #kb_set_title { height: auto !important; float: left; margin-left: 0 !important; margin-bottom: 3px;}
 .kb_overlay_sub_title { height: 30px !important; float: left; line-height: 22px; }
 .overlay_box {
 	/* overlay is hidden before loading */

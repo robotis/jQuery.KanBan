@@ -272,6 +272,17 @@
 			});
 			return div;
 		},
+		fill_userlist : function(data) {
+	    	var kanban = this;
+	    	var userlist = $(kanban.p('#header_users'));
+	    	$.each(data, function(i, user) {
+				user.src = kanban.fill_user_img(user);
+				userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
+					var user = $(this).find('img').attr('rel');
+					kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
+				}));
+			});
+	    },
 		fill_action : function(action) {
 			var kanban = this;
 			var act = $('<div>', {'class' : kanban.p('action') + ' ' + kanban.p(action.key)});
@@ -376,7 +387,7 @@
 			users.append(ul);
 			sidebar.append(users);
 			// Members
-			sidebar.append($('<div>').addClass(kanban.p('separator')).text('Actions'));
+//			sidebar.append($('<div>').addClass(kanban.p('separator')).text('Actions'));
 			sidebar.append($('<hr>'));
 			sidebar.append(kanban.fill_action({'key': 'set_priority', 'icon': '◱'}));
 			var ps = $('<div>', {'class': kanban.p('prioritys')});
@@ -567,13 +578,7 @@
 	    	var userlist = $(kanban.p('#header_users'));
 	    	userlist.empty();
 	    	kanban.request({'request':'fetch_users'}, function(data) {
-				$.each(data, function(i, user) {
-					user.src = kanban.fill_user_img(user);
-					userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
-						var user = $(this).find('img').attr('rel');
-						kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
-					}));
-				});
+	    		kanban.fill_userlist(data);
 	    	});
 	    },
 		reload : function(options) {
@@ -600,13 +605,7 @@
 				}
 				if($.inArray('user', options) > -1 && data.users) {
 					userlist.empty();
-					$.each(data.users, function(i, user) {
-						user.src = kanban.fill_user_img(user);
-						userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
-							var user = $(this).find('img').attr('rel');
-							kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
-						}));
-					});
+					kanban.fill_userlist(data.users);
 				}
 				if($.inArray('filter', options) > -1) {
 					filters.empty();
