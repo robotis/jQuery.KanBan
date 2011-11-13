@@ -142,15 +142,15 @@
 		fill_ul_user : function(user) {
 	    	var kanban = this;
 			user.src = kanban.fill_user_img(user);
-			var elm = kanban.fill_user(user, kanban.p('user'), true);
+			var elm = kanban.fill_user(user, kanban.p('user'), true, function() {
+				var user = $(this).find('img').attr('rel');
+				kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
+			});
 			elm.mousedown(function(e) {
 				if(e.which === 3) {
 					// Edit user
 					return false;
 				}
-			}).click(function() {
-				var user = $(this).find('img').attr('rel');
-				kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
 			}).bind('contextmenu', function(e) {
 				// Disable right-click menu
 			    return false;
@@ -396,7 +396,9 @@
 			// Members
 //			sidebar.append($('<div>').addClass(kanban.p('separator')).text('Actions'));
 			sidebar.append($('<hr>'));
-			sidebar.append(kanban.fill_action({'key': 'set_priority', 'icon': '◱'}));
+			sidebar.append(kanban.fill_action({'key': 'set_priority', 'icon': '◱', 'action': function() {
+				$(kanban.p('.prioritys')).toggle();
+			}}));
 			var ps = $('<div>', {'class': kanban.p('prioritys')});
 			$.each(kanban.config.prioritys, function(i, v) {
 				var inner = $('<div>', {'class': kanban.p('priority'), 'rel': v.color});
@@ -408,7 +410,7 @@
 				});
 				ps.append(inner);
 			});
-			sidebar.append(ps);
+			sidebar.append(ps.hide());
 			sidebar.append(kanban.fill_action({'key': 'archive', 'icon': '◧'}));
 			mdiv.append(sidebar);
 			return mdiv;
