@@ -139,6 +139,24 @@
 			}
 			return li;
 		},
+		fill_ul_user : function(user) {
+	    	var kanban = this;
+			user.src = kanban.fill_user_img(user);
+			var elm = kanban.fill_user(user, kanban.p('user'), true);
+			elm.mousedown(function(e) {
+				if(e.which === 3) {
+					// Edit user
+					return false;
+				}
+			}).click(function() {
+				var user = $(this).find('img').attr('rel');
+				kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
+			}).bind('contextmenu', function(e) {
+				// Disable right-click menu
+			    return false;
+			});
+			return elm;
+	    },
 		fill_user_img : function(user) {
 			return (user.src)
 				? this.config.img_dir + user.src
@@ -272,17 +290,6 @@
 			});
 			return div;
 		},
-		fill_userlist : function(data) {
-	    	var kanban = this;
-	    	var userlist = $(kanban.p('#header_users'));
-	    	$.each(data, function(i, user) {
-				user.src = kanban.fill_user_img(user);
-				userlist.append(kanban.fill_user(user, kanban.p('user'), true, function() {
-					var user = $(this).find('img').attr('rel');
-					kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
-				}));
-			});
-	    },
 		fill_action : function(action) {
 			var kanban = this;
 			var act = $('<div>', {'class' : kanban.p('action') + ' ' + kanban.p(action.key)});
@@ -417,19 +424,18 @@
 			form.append($('<label>', {'for' : 'fname', 'class' : 'flabel'}).text(kanban.b('User ID')));
 			var input = $('<input>', {'id':  kanban.p('uid_input')}).keydown(function(e) {
 				if(e.keyCode === 13) {
+					var t = $(this);
 					var send = {
 						'request': 'new_user',
-						'user': $(this).val()
+						'user': t.val()
 					};
 					kanban.request(send, function(user) {
-						user.src = kanban.fill_user_img(user);
-						var nu = kanban.fill_user(user, kanban.p('user'));
-						nu.draggable({
-							revert: 'invalid',
-							helper: 'clone',
-						});
-						$(kanban.p('#header_users')).append(nu);
+						$(kanban.p('#header_users')).append(kanban.fill_ul_user(user));
+//						user.src = kanban.fill_user_img(user);
+//						$(kanban.p('#header_users')).append(kanban.fill_user(user, kanban.p('user'), true));
 					});
+					t.val('');
+					kanban.flash(mdiv, '#0F0');
 				} 
 				// Propagate
 				return true;
@@ -578,7 +584,9 @@
 	    	var userlist = $(kanban.p('#header_users'));
 	    	userlist.empty();
 	    	kanban.request({'request':'fetch_users'}, function(data) {
-	    		kanban.fill_userlist(data);
+	    		$.each(data, function(i, user) {
+	    			userlist.append(kanban.fill_ul_user(user));
+	    		});
 	    	});
 	    },
 		reload : function(options) {
@@ -605,7 +613,9 @@
 				}
 				if($.inArray('user', options) > -1 && data.users) {
 					userlist.empty();
-					kanban.fill_userlist(data.users);
+		    		$.each(data.users, function(i, user) {
+		    			userlist.append(kanban.fill_ul_user(user));
+		    		});
 				}
 				if($.inArray('filter', options) > -1) {
 					filters.empty();
