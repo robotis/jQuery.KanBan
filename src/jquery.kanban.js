@@ -165,20 +165,20 @@
 		fill_queue : function(colId, col) {
 			var kanban = this;
 			var cID = kanban.p('column_') + colId;
-			var column = $('<div>', {'class' : kanban.p('column')});
+			var column = $('<div>', {'class' : kanban.p('column queue')});
 			var title = $('<h3>');
 			title.append($('<span>', {'class' : kanban.p('icon')}).html(col.ikon));
 			title.append($('<span>', {'class' : kanban.p('h3')}).html(col.name));
-			title.append($('<span>', {'class' : kanban.p('icon') + ' ' + kanban.p('add'), 
-								   	  'rel' : cID}
+			title.append($('<span>', {'class' : kanban.p('icon add clickable'), 
+								   	  'rel' : cID, 'title': kanban.b('Create new task in this queue')}
 			).html(col.add_ikon).click(function() { 
 				kanban.$elem.trigger('new_task', {'qid': $(this).attr('rel')});
 			}));
 			column.append(title);
 			
-			var queue = $('<ul>', {'class' : kanban.p('queue'), 'id' : cID});
+			var queue = $('<ul>', {'class' : kanban.p('queue_inner'), 'id' : cID});
 			queue.sortable({
-				connectWith: [kanban.p('.queue')]
+				connectWith: [kanban.p('.queue_inner')]
 				,items: 'li.' + kanban.p('task') + ':not(.ui-state-disabled)'
 				,receive: function(event, ui) {
 					kanban.$elem.trigger('move_task', {tid: ui.item.attr('id'), qid: $(this).attr('id')});
@@ -394,11 +394,10 @@
 			users.append(ul);
 			sidebar.append(users);
 			// Members
-//			sidebar.append($('<div>').addClass(kanban.p('separator')).text('Actions'));
 			sidebar.append($('<hr>'));
 			sidebar.append(kanban.fill_action({'key': 'set_priority', 'icon': '◱', 'action': function() {
 				$(kanban.p('.prioritys')).toggle();
-			}}));
+			}, 'text': kanban.b('Set priority')}));
 			var ps = $('<div>', {'class': kanban.p('prioritys')});
 			$.each(kanban.config.prioritys, function(i, v) {
 				var inner = $('<div>', {'class': kanban.p('priority'), 'rel': v.color});
@@ -411,7 +410,7 @@
 				ps.append(inner);
 			});
 			sidebar.append(ps.hide());
-			sidebar.append(kanban.fill_action({'key': 'archive', 'icon': '◧'}));
+			sidebar.append(kanban.fill_action({'key': 'archive', 'icon': '◧', 'text': kanban.b('Archive')}));
 			mdiv.append(sidebar);
 			return mdiv;
 		},
@@ -433,8 +432,6 @@
 					};
 					kanban.request(send, function(user) {
 						$(kanban.p('#header_users')).append(kanban.fill_ul_user(user));
-//						user.src = kanban.fill_user_img(user);
-//						$(kanban.p('#header_users')).append(kanban.fill_user(user, kanban.p('user'), true));
 					});
 					t.val('');
 					kanban.flash(mdiv, '#0F0');
@@ -463,8 +460,7 @@
 	    setup : function() {
 	    	this.$elem.removeClass(this.config.main_class).addClass(this.config.main_class);
 	    	var kanban = this;
-	    	var content = $('<div>', {'id' : kanban.p('content')});
-			var header = $('<div>', {'id' : kanban.p('header')});
+			var header = $('<div>', {'id' : kanban.p('header'), 'class': kanban.p('row')});
 			
 			$.each(kanban.config.actions, function(i, action) {
 				if(action) {
@@ -485,27 +481,26 @@
 				header.append(search);
 			}
 			
-			content.append(header);
+			this.$elem.append(header);
 			
-			var userlist 	= $('<div>', {'id' : kanban.p('user_list')});
+			var userlist 	= $('<div>', {'id' : kanban.p('user_list'), 'class': kanban.p('row')});
 			var ur 			= $('<div>', {'class' : kanban.p('users')});
 			var ul 			= $('<ul>',  {'id' : kanban.p('header_users')});
 			ur.append(ul);
 			userlist.append(ur);
-			content.append(userlist);
+			this.$elem.append(userlist);
 			
-			var filters = $('<div>', {'id': kanban.p('filters')}).hide();
+			var filters = $('<div>', {'id': kanban.p('filters'), 'class': kanban.p('row')}).hide();
 			filters.hide();
-			content.append(filters);
+			this.$elem.append(filters);
 			
-			var columns = $('<div>', {'class' : kanban.p('columns')});
+			var columns = $('<div>', {'class' : kanban.p('row')});
 			var colcount = kanban.config.columns.length;
 			for(i=0; i<colcount; i++) {
 				columns.append(kanban.fill_queue(i+1, kanban.config.columns[i]));
 			}
-			content.append(columns);
-			content.append($('<div>', {'class' : kanban.p('overlay')}));
-			kanban.$elem.html(content);
+			this.$elem.append(columns);
+			this.$elem.append($('<div>', {'class' : kanban.p('overlay')}));
 			kanban.resize();
 		},
 		set_events : function() {
@@ -547,10 +542,10 @@
 	    	var width = ((uwid / cc) - margin);
 	    	this.$elem.css({'width': uwid, 'margin': '5px auto'});
 	    	this.$elem.find(this.p('#header')).css('width', uwid);
-	    	this.$elem.find(this.p('.column')).css(
+	    	this.$elem.find(this.p('.queue')).css(
 	    			{'margin-right': margin, 'width': width}
 	    	);
-	    	this.$elem.find(this.p('.column.first')).css(
+	    	this.$elem.find(this.p('.queue.first')).css(
 	    			{'width': (width - margin), 'margin-left': margin, 'margin-right': margin}
 	    	);
 	    	if(width < 180) {
@@ -562,7 +557,7 @@
 	    reload_queue : function(options) {
 	    	var kanban = this;
 	    	var queue = $(kanban.p('#column_') + options.id);
-	    	queue.empty().html($('<div>', {'class' : 'loading'}));
+	    	queue.empty().html($('<div>', {'class' : kanban.p('loading')}));
 	    	kanban.request({'request':'fetch_queue', 'id': options.id}, function(data) {
 	    		queue.empty();
 				if(data) {
@@ -575,7 +570,7 @@
 	    reload_task : function(options) {
 	    	var kanban = this;
 	    	var task = $('#' + options.id);
-	    	task.empty().html($('<div>', {'class' : 'loading'}));
+	    	task.empty().html($('<div>', {'class' : kanban.p('loading')}));
 	    	kanban.request({'request':'fetch_task', 'id': options.id}, function(data) {
 	    		task.empty();
 	    		kanban.fill_task_inner(task, data);
@@ -593,12 +588,12 @@
 	    },
 		reload : function(options) {
 	    	var kanban 		= this;
-	    	var queues 		= $(this.p('.queue'));
+	    	var queues 		= $(this.p('.queue_inner'));
 	    	var userlist 	= $(this.p('#header_users'));
 	    	var filters 	= $(this.p('#filters'));
 	    	if(!options) { options = ['task', 'filter', 'user']; }
 	    	if($.inArray('task', options) > -1) 
-	    		queues.empty().html($('<div>', {'class' : 'loading'}));
+	    		queues.empty().html($('<div>', {'class' : kanban.p('loading')}));
 	    	
 			kanban.request({'request':'fetch_all'}, function(data) {
 				var colId = 1;
@@ -671,7 +666,7 @@
 		new_task : function(options) {
 			var kanban = this;
 			var send = {
-				'request': 'new',
+				'request': 'new_task',
 				'column': options.qid
 			};
 			kanban.request(send, function(data) {
@@ -729,15 +724,15 @@
 			var kanban = this;
 			function overlay(data) {
 				var id = kanban.p("overlay");
-				var odiv = $('<div>', {'id' : id, 'class': 'overlay_box'});
-				var ocontent = $('<div>', {'class': 'overlay_box_content'});
-				var ohead = $('<div>', {'class': 'overlay_box_head'});
+				var odiv = $('<div>', {'id' : id, 'class': kanban.p('overlay_box')});
+				var ocontent = $('<div>', {'class': kanban.p('overlay_box_content')});
+				var ohead = $('<div>', {'class': kanban.p('overlay_box_head')});
 				
 				var clId = id + '_close';
 				ohead.append($('<span>', {'id' : clId}));
 				
 				ocontent.append(ohead);
-				var content = $('<div>', {'class' : 'overlay_content'});
+				var content = $('<div>', {'class' : kanban.p('overlay_content')});
 				
 				content.html(callback(data));
 				ocontent.append(content);
