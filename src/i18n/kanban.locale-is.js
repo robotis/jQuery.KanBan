@@ -7,13 +7,19 @@
  * http://www.gnu.org/licenses/gpl.html
 **/
 	Kanban.prototype.babel = {
-		new_user : 'Nýr notandi',
-		save : 'Vista',
-		'delete' : 'Eyða',
-		edit_task : 'Breyta verki',
-		filter: 'Sía',
-		reload: '',
-		userid: 'Notendanafn',
+		'New user' : 'Nýr notandi'
+		,'Filter': 'Sía'
+		,'Reload': ''
+		,'User ID': 'Notendanafn'
+		,'Description': 'Lýsing'
+		,'Comments': 'Athugasemdir'
+		,'Add description': 'Skrifa lýsingu'
+		,'No description': 'Engin lýsing'
+		,'Add comment': 'Skrifa athugasemd'
+		,'Actions': 'Aðgerðir'
+		,'Set priority': 'Setja merkingu'
+		,'Resolve': 'Leysa'
+		,'Members': 'Aðilar'
 	}
 
 })(jQuery);

@@ -109,7 +109,7 @@
     background-color: #2B515B;
 }
 div#kb_filters .kb_btn {
-	height: 35px;
+	height: 37px;
 }
 .kb_action .kb_btn .kb_btn_text {
 	padding-left: 2px;
@@ -137,7 +137,7 @@ div#kb_filters .kb_btn {
 .kanban div#kb_user_list,
 .kanban div#kb_filters {
 	background-color: #003D4D;
-    height:				32px;
+    height:				34px;
 	clear: both;
 	padding: 3px;
 	overflow: hidden;
@@ -167,7 +167,7 @@ div#kb_filters .kb_btn {
 	width:				100%;
 	min-height:			550px;
 }
-.kb_queue_inner .ui-sortable-placeholder { height: 40px !important; }
+.kb_queue_inner .ui-sortable-placeholder { height: 50px !important; }
 /*
 	Task element
 */
@@ -189,25 +189,57 @@ div#kb_filters .kb_btn {
 .kanban .kb_task.kb_type_r { background-color: #f4d6e5; border: 1px dashed #AAA; }
 .kanban .kb_task .title { font-weight: bold; }
 /*
+	Form
+*/
+.kb_overlay hr { color: #DDD; background-color: #DDD; box-shadow: 0 1px 3px #D3D3D3; }
+.kb_overlay a {text-decoration: none; font-size: 1.1em; }
+.kb_separator { clear: both; font-size: 1.1em; color: #888; padding-top: 5px; }
+/*
 	Form sidebar
 */
 .kb_sidebar {  width: 30%; float: right; }
 .kb_sidebar hr, .kb_main hr { clear: both; }
-.kb_sidebar .kb_separator { clear: both; }
 .kb_sidebar .kb_action { width: 100%; }
-.kb_sidebar .kb_action .kb_btn { width: 98%; }
+.kb_sidebar .kb_action .kb_btn { 
+	width: 95%; 
+	background-color: #E3E3E3; 
+	color: #444444; 
+	text-shadow: none; 
+	box-shadow: 0 1px 3px #D3D3D3; 
+	border: 1px solid #909090;
+	margin: 2px 0;
+}
 .kb_sidebar .kb_action .kb_btn .kb_btn_icon { line-height: 25px; }
 /*
 	Form main content
 */
-div.kb_main { clear: both; width: 69%; float: left; }
+.kb_main { clear: both; width: 69%; float: left; }
 /*
 	Form inputs
 */
-a.kb_overlay_input {text-decoration: none; }
+.kb_overlay_input_wrap { margin-bottom: 5px; }
 .kb_overlay_inner_input { width: 95%; }
-#kb_add_description_input { height: 200px; }
-#kb_add_comment_input { height: 100px; }
+.kb_overlay_inner_input.kb_long { min-height: 250px; }
+.kb_empty_input {
+/*	-moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;*/
+    -moz-transition: height 85ms ease-in-out 0s;
+    -webkit-transition: height 85ms ease-in-out 0s;
+    background-color: #FFFFFF;
+    border-color: #D3D3D3 #D3D3D3 #BBBBBB;
+    border-radius: 4px 4px 4px 4px;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 0 1px 3px #D3D3D3;
+    color: #999999;
+    height: 18px;
+    margin: 4px 4px 4px 0;
+    padding: 8px 10px;
+    width: 93%;
+}
 /*
 	Task form prioritys
 */
@@ -215,14 +247,20 @@ a.kb_overlay_input {text-decoration: none; }
 .kb_prioritys { clear: both; position: relative; padding-top: 2px; height: 24px; }
 .kb_prioritys .kb_priority { float: left; margin-right: 1px; height: 26px;}
 /* Current */
-.kb_prioritys_current { clear: both; position: relative; }
+.kb_prioritys_current { clear: both; position: relative; top: -2px; }
 .kb_prioritys_current .kb_priority { float: left; margin-right: 1px; }
-.kb_prioritys_current .kb_priority .show { width: 40px; height: 8px; -moz-border-radius: 3px;}
+.kb_prioritys_current .kb_priority .show { width: 40px; height: 8px; -moz-border-radius: 3px; }
+/*
+	Comments
+*/
+.kb_comments { list-style: none outside none;  margin: 0; padding: 0;}
+.kb_comment { clear: both; min-height: 35px; }
+.kb_comment .kb_user_img { }
+.kb_comment .kb_comment_body {  font-style: italic; padding-left: 40px; }
 /*
 	User images
 */
 .kanban .kb_user_img {
-	 -moz-user-select: none;
     background-color: #CCCCCC;
     border: 1px solid #B9B9B9;
     border-radius: 2px 2px 2px 2px;
@@ -230,12 +268,16 @@ a.kb_overlay_input {text-decoration: none; }
     cursor: pointer;
     display: block;
     float: left;
-    height: 30px;
+    height: 33px;
     margin: 0 1px 1px 0;
     position: relative;
-    width: 30px;
+    width: 33px;
     z-index: 0;
+    box-sizing: border-box; 
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
+.kanban .kb_owner img { border: 2px solid #090; }
 .kanban .kb_task .kb_users,
 .kanban #kb_overlay .kb_users { height: 35px; }
 .kanban div#kb_user_list ul,
@@ -251,7 +293,7 @@ a.kb_overlay_input {text-decoration: none; }
 .kanban li.kb_task .kb_users .kb_userlist li.kb_taskuser,
 .kanban #kb_filters li.kb_taskuser,
 .kanban #kb_overlay .kb_users .kb_userlist li.kb_taskuser {
-	float: left;
+	float: right;
 	text-align: center;
     width: 35px;
 }
