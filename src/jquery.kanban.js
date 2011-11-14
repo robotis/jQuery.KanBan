@@ -43,25 +43,26 @@
 	
 	Kanban.prototype = {
 		defaults: {
-	    	main_class: 	'kanban',
-	    	prefix:			'kb_',
-			id: 			'',
-			url: 			'',
-			def_user_img:	'',
-			img_dir:		'',
-			columns:		[],
-			prioritys:		{},
-			overlay:		{},
-			ajax_method:	'post',
-			actions:		{
-				new_user:		{'icon': '⊞', 'trigger': 'show_form', 'trigger_options': {'type': 'user_form'}},
-				filter:			{'icon': '☰', 'trigger': 'show_form', 'trigger_options': {'type': 'filter_form'}},
-				reload:			{'icon': '↺', 'trigger': 'reload'}
-			},
-			custom_actions: {},
-			search:			true,
-			edit_form:		null,
-			user_form:		null,
+	    	main_class: 	'kanban'
+	    	,prefix:		'kb_'
+			,id: 			''
+			,url: 			''
+			,def_user_img:	''
+			,img_dir:		''
+			,columns:		[]
+			,prioritys:		{}
+			,overlay:		{}
+			,ajax_method:	'post'
+			,actions:		{
+				new_user:		{'icon': '⊞', 'trigger': 'show_form', 'trigger_options': {'type': 'user_form'}}
+				,filter:		{'icon': '☰', 'trigger': 'show_form', 'trigger_options': {'type': 'filter_form'}}
+				,reload:		{'icon': '↺', 'trigger': 'reload'}
+			}
+			,custom_actions: {}
+			,search:		true
+			,edit_form:		null
+			,user_form:		null
+			,gutter:		0
 	    },
 	    init : function() {
 	    	this.config = $.extend({}, this.defaults, this.options, this.metadata);
@@ -96,15 +97,15 @@
 	    	$.extend(this.config.actions, this.config.custom_actions);
 	    	// Overlay defaults 
 	    	$.extend(this.config.overlay, {
-				load			: true,
-				top				: 80,
-				oneInstance		: false,
-				closeOnClick	: false,
-				closeOnEsc		: true,
-				mask 			: {
-					color			: '#fff',
-					loadSpeed		: 200,
-					opacity			: 0.5
+				load			: true
+				,top			: 80
+				,oneInstance	: false
+				,closeOnClick	: false
+				,closeOnEsc		: true
+				,mask 			: {
+					color			: '#fff'
+					,loadSpeed		: 200
+					,opacity		: 0.5
 				}	
 			});
 			
@@ -126,18 +127,18 @@
 			 	? $('<li>', {'class' : cls})
 			 	: $('<li>', {'class' : this.p('taskuser')});
 			li.append($('<img>', {
-				'class' : this.p('user_img'),
-				'src': user.src, 
-				'rel': user.uid,
-				'title': user.name
+				'class': 	this.p('user_img')
+				,'src': 	user.src 
+				,'rel': 	user.uid
+				,'title': 	user.name
 			}));
 			if(click_callback) {
 				li.click(click_callback);
 			}
 			if(draggable) {
 				li.draggable({
-					revert: 'invalid',
-					helper: 'clone'
+					revert: 	'invalid'
+					,helper: 	'clone'
 				});
 			}
 			return li;
@@ -213,8 +214,8 @@
 	    	var config = this.config;
 	    	var kanban = this;
 			var task = $('<li>', {
-				'class' : kanban.p('task'),
-				'id' : data.id
+				'class' : 	kanban.p('task')
+				,'id' : 	data.id
 			});
 			if(data.type) {
 				task.addClass(kanban.p('type_') + data.type);
@@ -227,8 +228,8 @@
 					var task = $(this);
 					var drag = u.draggable.find('img');
 					var user = {
-						uid : drag.attr('id'),
-						src : drag.attr('src')
+						uid : 	drag.attr('id')
+						,src : 	drag.attr('src')
 					};
 					var send = {};
 					send['request'] = 'add_user';
@@ -244,8 +245,8 @@
 			});
 			task.click(function() {
 				var send = {
-					'request': 'fetch_task',
-					'id': data.id
+					'request': 	'fetch_task'
+					,'id':		data.id
 				};
 				kanban.request(send, function(t) {
 					$.each(t['users'], function(i, user) {
@@ -267,9 +268,9 @@
 		fill_filter : function(filter) {
 			var kanban = this;
 			var div = $('<div>', {
-				'class': kanban.p('filter'), 
-				'rel': filter.filter_id,
-				'id' : kanban.p('filter_') + filter.filter_id
+				'class': 	kanban.p('filter')
+				,'rel': 	filter.filter_id
+				,'id' : 	kanban.p('filter_') + filter.filter_id
 			});
 			var btn = $('<a>', {'href': '#', 'class' : kanban.p('btn')});
 			btn.append($('<span>', {'class': kanban.p('btn_icon')}).append('⊗'));
@@ -279,10 +280,10 @@
 					break;
 				case 'user':
 					var img = $('<img>', {
-						'class' : kanban.p('user_img'),
-						'src': kanban.fill_user_img(filter.val), 
-						'rel': filter.val.uid,
-						'title': filter.val.name
+						'class' : 	kanban.p('user_img')
+						,'src': 	kanban.fill_user_img(filter.val)
+						,'rel': 	filter.val.uid
+						,'title': 	filter.val.name
 					});
 					btn.append($('<span>', {'class': kanban.p('btn_text')}).append(img));
 					break;
@@ -327,9 +328,9 @@
 					function(from) {
 						var val = $(from).val();
 						var send = {
-							'request': 'set_title',
-							'id': task.id,
-							'value': val
+							'request': 	'set_title'
+							,'id': 		task.id
+							,'value': 	val
 						};
 						kanban.request(send, function() {
 							kanban.$elem.trigger('reload_task', {id: task.id});
@@ -356,9 +357,9 @@
 				$('<a>', {'id': kanban.p('add_description'), rel: task.id}).text(desc), desc, 
 					function(from) {					
 						var send = {
-							'request': 'add_description',
-							'id': task.id,
-							'value': $(from).val()
+							'request': 	'add_description'
+							,'id': 		task.id
+							,'value': 	$(from).val()
 						};
 						kanban.request(send, null);
 					}, 
@@ -371,9 +372,9 @@
 				$('<a>', {'id': kanban.p('add_comment'), rel: task.id}).text(kanban.b('Add comment')), '', 
 					function(from) {					
 						var send = {
-							'request': 'add_comment',
-							'id': task.id,
-							'value': $(from).val()
+							'request': 	'add_comment'
+							,'id': 		task.id
+							,'value': 	$(from).val()
 						};
 						kanban.request(send, null);
 					}, 
@@ -542,9 +543,11 @@
 	    	if(uwid > $(window).width()) {
 	    		uwid = $(window).width() - this.config.scrollbarWidth;
 	    	}
-	    	uwid -= 10; // auto-margins
+	    	uwid -= this.config.gutter || 0; // auto-margins
 	    	var width = ((uwid / cc) - margin);
-	    	this.$elem.css({'width': uwid, 'margin': '5px auto'});
+	    	this.$elem.css({'width': uwid})
+	    	if(this.config.gutter) 
+	    		this.$elem.css('margin', this.config.gutter + 'px auto');
 	    	this.$elem.find(this.p('#header')).css('width', uwid);
 	    	this.$elem.find(this.p('.queue')).css(
 	    			{'margin-right': margin, 'width': width}
@@ -702,9 +705,9 @@
 			this.$elem.trigger('onSetPriority');
 			var kanban = this;
 			this.request({
-				'request': 'set_priority',
-				'id': options.tid,
-				'value': options.priority
+				'request': 	'set_priority'
+				,'id': 		options.tid
+				,'value': 	options.priority
 			}, function(data) {
 				kanban.$elem.trigger('reload_task', {id: options.tid});
 			});
@@ -712,18 +715,20 @@
 /*
  * Utility
  * */
+		// Send request to server
 		request : function(send, callback, error_callback) {
 			$.ajax({
-				type: this.config.ajax_method,
-				dataType: 'JSON', 
-				url: this.config.url, 
-				data : send, 
-				success : function(data) {
+				type: 		this.config.ajax_method
+				,dataType: 	'JSON'
+				,url: 		this.config.url
+				,data: 		send
+				,success: 	function(data) {
 					if(data && data.error) {
-						if(error_callback && typeof(error_callback) == 'function') 
+						if(error_callback && typeof(error_callback) == 'function') {
 							error_callback(data.error);
-						else 
+						} else {
 							alert(data.error);
+						}
 					} else {
 						if(callback && typeof(callback) == 'function') 
 							callback(data);
@@ -731,6 +736,7 @@
 				}
 			});
 		},
+		// Create and show overlay
 		trigger_overlay : function(send, callback) {
 			var kanban = this;
 			function overlay(data) {
@@ -763,6 +769,7 @@
 				overlay(null);
 			}
 		},
+		// Create hidden input form overlay forms
 		overlay_input : function(elem, text, on_enter, type) {
 			var kanban = this;
 			var id = elem.attr('id');
@@ -799,16 +806,19 @@
 			wrap.append(form);
 			return wrap;
 		},
+		// Notify change by flashing element
 		flash : function(elem, color, duration) {
 			var highlightBg = color || "#FFFF9C";
 		    var animateMs = duration || 500;
 		    var originalBg = elem.css("backgroundColor");
 		    elem.effect("highlight", {color: highlightBg}, animateMs);
 		},
+		// Localization
 	    b : function(t) {
 			if(!this.babel) return t;
 	    	return (typeof(this.babel[t]) == 'string') ? this.babel[t] : '!'+t+'!';
 	    },
+	    // Prefix class with set prefix
 	    p : function(t) {
 	    	if(this.config.prefix) {
 	    		var a = t.split(' ');
