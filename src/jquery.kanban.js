@@ -60,7 +60,7 @@
 				,reload:		true
 				,search:		true
 			}
-			,edit_board:	false
+			,edit_board:	true
 			,edit_form:		null
 			,user_form:		null
 			,custom_actions: {}
@@ -657,40 +657,44 @@
 	    		queues.empty().html($('<div>', {'class' : kanban.p('loading')}));
 	    	
 			kanban.request({'request':'fetch_all'}, function(data) {
-				var colId = 1;
-				if($.inArray('task', options) > -1) {
-					$.each(kanban.config.columns, function() {
-						var queue = $(kanban.p('#column_') + colId).empty();
-						var wid = queue.width();
-						if(data["column_" + colId]) {
-							$.each(data["column_" + colId], function(i, t) {
-								queue.append(kanban.fill_task(t, wid));
-							});
-						}
-						colId++;
-					});
-				}
-				if($.inArray('user', options) > -1 && data.users) {
-					userlist.empty();
-		    		$.each(data.users, function(i, user) {
-		    			if(!kanban.current_user && user.uid === kanban.config.user_uid) {
-		    				kanban.current_user = user;
-		    			}
-		    			userlist.append(kanban.fill_ul_user(user));
-		    		});
-				}
-				if($.inArray('filter', options) > -1) {
-					filters.empty();
-					if(data.filters) {
-						filters.show();
-						$.each(data.filters, function(i, ft) {
-							filters.append(kanban.fill_filter(ft));
+				if(data) {
+					var colId = 1;
+					if($.inArray('task', options) > -1) {
+						$.each(kanban.config.columns, function() {
+							var queue = $(kanban.p('#column_') + colId).empty();
+							var wid = queue.width();
+							if(data["column_" + colId]) {
+								$.each(data["column_" + colId], function(i, t) {
+									queue.append(kanban.fill_task(t, wid));
+								});
+							}
+							colId++;
 						});
-					} else {
-						filters.hide();
 					}
+					if($.inArray('user', options) > -1 && data.users) {
+						userlist.empty();
+			    		$.each(data.users, function(i, user) {
+			    			if(!kanban.current_user && user.uid === kanban.config.user_uid) {
+			    				kanban.current_user = user;
+			    			}
+			    			userlist.append(kanban.fill_ul_user(user));
+			    		});
+					}
+					if($.inArray('filter', options) > -1) {
+						filters.empty();
+						if(data.filters) {
+							filters.show();
+							$.each(data.filters, function(i, ft) {
+								filters.append(kanban.fill_filter(ft));
+							});
+						} else {
+							filters.hide();
+						}
+					}
+					kanban.resize();	
+				} else {
+					queues.empty();
 				}
-				kanban.resize();	
 			});
 		}
 		,drop_filter : function(options) {
