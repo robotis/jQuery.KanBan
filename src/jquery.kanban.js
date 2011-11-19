@@ -168,7 +168,7 @@
 			return elm;
 	    }
 		,fill_user_img : function(user) {
-			return (user.src)
+			return (user && user.src)
 				? this.config.img_dir + user.src
 				: this.config.def_user_img;
 		}
@@ -209,13 +209,15 @@
 			head.append(kanban.fill_priority(data.priority));
 			head.append($('<span>', {'class' : kanban.p('task_title')}).html(data.title));
 			var foot = $('<div>', {'class' : kanban.p('users')});
-			var ul = $('<ul>', {'class' : kanban.p('userlist')});
-			$.each(data['users'], function(i, user) {
-				if(i < 5) {
-					ul.append(kanban.fill_user(user));
-				}
-			});
-			foot.append(ul);
+			if(data.users) {
+				var ul = $('<ul>', {'class' : kanban.p('userlist')});
+				$.each(data['users'], function(i, user) {
+					if(i < 5) {
+						ul.append(kanban.fill_user(user));
+					}
+				});
+				foot.append(ul);
+			}
 			task.append(head);
 			task.append(foot);
 		}
@@ -232,21 +234,12 @@
 			kanban.fill_task_inner(task, data);
 			if(this.can_edit()) {
 				task.droppable({ 
-					hoverClass: kanban.p('drophover'),
-					accept: kanban.p('.user'),
-					drop: function(e, u) {
-						var task = $(this);
-						var drag = u.draggable.find('img');
-						var send = {};
-						send['request'] = 'add_user';
-						send['task'] = task.attr('id');
-						send['user'] = drag.attr('rel');
-						kanban.request(send, function(data) {
-							task.find(kanban.p('.userlist')).append(kanban.fill_user(data));
-							kanban.flash(task, "#2A2");
-						}, function() {
-							kanban.flash(task, "#F00");
-						});
+					hoverClass: kanban.p('drophover')
+					,accept: kanban.p('.user')
+					,drop: function(e, u) {
+						var task = $(this).attr('id');
+						var uid = u.draggable.find('img').attr('rel');
+						kanban.$elem.trigger('add_user', {'uid': uid, 'tid': task});
 					}
 				});
 			}
@@ -573,7 +566,7 @@
 			        'move_task', 'drop_user', 'set_priority', 
 			        'add_filter', 'new_task', 'show_form',
 			        'filter_form', 'reload_users', 'reload_queue',
-			        'reload_task'], function(i, b) {
+			        'reload_task', 'add_user'], function(i, b) {
 				elem.bind(b, function(e, options) { 
 					console.log("Trigger: " + b);
 					kanban[b](options); 
@@ -692,9 +685,10 @@
 						}
 					}
 					kanban.resize();	
-				} else {
-					queues.empty();
-				}
+				} 
+			}, function(error) {
+				queues.empty();
+				alert(error);
 			});
 		}
 		,drop_filter : function(options) {
@@ -737,15 +731,20 @@
 		,new_task : function(options) {
 			this.$elem.trigger('onNewTask');
 			var kanban = this;
+			var uid = (kanban.current_user)
+				? kanban.current_user.uid
+				: 'unknown';
 			var send = {
 				'request': 	'new_task'
 				,'column': 	options.qid
-				,'uid':		kanban.current_user.uid
+				,'uid':		uid
 			};
 			kanban.request(send, function(data) {
-				$('ul#' + options.qid).prepend(
-					kanban.fill_task(data)
-				);
+				if(data) {
+					$('ul#' + options.qid).prepend(
+						kanban.fill_task(data)
+					);
+				}
 			});
 		}
 		,move_task : function(options) {
@@ -754,6 +753,21 @@
 				'request': 'move',
 				'task': options.tid,
 				'column': options.qid
+			});
+		}
+		,add_user : function(options) {
+			var kanban = this;
+			var send = {
+				'request': 'add_user'
+				,'task': options.tid
+				,'user': options.uid
+			};
+			var task = $('#' + options.tid);
+			kanban.request(send, function(data) {
+				task.find(kanban.p('.userlist')).append(kanban.fill_user(data));
+				kanban.flash(task, "#2A2");
+			}, function(data) {
+				kanban.flash(task, "#F00");
 			});
 		}
 		,drop_user : function(options) {
@@ -792,8 +806,13 @@
 							alert(data.error);
 						}
 					} else {
-						if(callback && typeof(callback) == 'function') 
-							callback(data);
+						if(callback && typeof(callback) == 'function') {
+							if(data) {
+								callback(data);
+							} else {
+								alert('Received empty reponce');
+							}
+						}
 					}
 				}
 			});
@@ -884,7 +903,7 @@
 			if(task) {
 				return (this.current_user.uid === task.owner);
 			} 
-			return (this.edit_board === true);
+			return (this.config.edit_board === true);
 		}
 		// Localization
 	    ,b : function(t) {

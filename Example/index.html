@@ -10,11 +10,10 @@
 </head>
 <body>
 <div id="kanban"></div>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 <script type="text/javascript" src="../src/jquery.tools.min.js"></script>
 <script type="text/javascript" src="../src/jquery.kanban.js"></script>
-<script type="text/javascript" src="../src/i18n/kanban.locale-en.js"></script>
 <script>
 jQuery(document).ready(function(){
 	$('#kanban').kanban({
@@ -23,6 +22,7 @@ jQuery(document).ready(function(){
 				   {'name': 'Working', 'ikon': '⊛', 'add_ikon': '+'},
 				   {'name': 'Testing', 'ikon': '⊕', 'add_ikon': '+'}]
 		,url: 'example.json.php'
+		,user_uid: '1'
 		,def_user_img:	'../themes/basic/ikons/male-user-small.png'
 		,prioritys:	{
 			0: {color: 'RED', name: 'A'}, 
@@ -30,7 +30,9 @@ jQuery(document).ready(function(){
 			2: {color: '#003C69', name: 'C'}
 		}
 		,custom_actions: {
-			rt:		{'icon': '⥮', 'text': 'RT', 'action': function() { $('#kanban').trigger('search', {'val': 'RT'}); }},
+			custom:		{'icon': '⥮', 'text': 'Custom', 'action': function() { 
+				$('#kanban').trigger('add_filter', {'value': 'New'}); 
+			}},
 		}
 	});
 });
