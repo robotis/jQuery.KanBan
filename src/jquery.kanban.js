@@ -6,7 +6,7 @@
  * <jtm@hi.is>
  * */
 ;(function($, window, document, undefined){	
-	var Kanban = function(elem, options){
+	var Kanban = function(elem, options) {
 		this.elem = elem;
 		this.$elem = $(elem);
 		this.options = options;
@@ -60,6 +60,7 @@
 				,reload:		true
 				,search:		true
 			}
+			,load:			true
 			,edit_board:	true
 			,edit_form:		null
 			,user_form:		null
@@ -67,13 +68,10 @@
 			,gutter:		0
 	    }
 	    ,init : function() {
+	    	// configuration
 	    	this.config = $.extend({}, this.defaults, this.options, this.metadata);
-	    	var kanban = this;
-	    	var action = this.p('.action');
-			var queue  = this.p('.queue');
-			var task   = this.p('.task');
-			var add	   = this.p('.add');
-    	
+	    	
+	    	// Kanban ID
 	    	if(!this.config.id) {
 	    		this.config.id = this.$elem.attr('id');
 				if(!this.config.id) {
@@ -89,18 +87,9 @@
 				,reload:	{'icon': '↺', 'trigger': 'reload'}
 			};
 	    	
-	    	if(!this.config.width) this.config.width = this.$elem.width();
-	    	function scrollbarWidth() {
-	    	    var div = $('<div style="width:50px;height:50px;overflow:hidden;position:absolute;top:-200px;left:-200px;"><div style="height:100px;"></div>');
-	    	    // Append our div, do our calculation and then remove it
-	    	    $('body').append(div);
-	    	    var w1 = $('div', div).innerWidth();
-	    	    div.css('overflow-y', 'scroll');
-	    	    var w2 = $('div', div).innerWidth();
-	    	    $(div).remove();
-	    	    return (w1 - w2);
-	    	}
-	    	this.config.scrollbarWidth = scrollbarWidth();
+	    	if(!this.config.width) 
+	    		this.config.width = this.$elem.width();
+	    	this.config.scrollbarWidth = this.scrollbarWidth();
 	    	
 	    	// Overlay defaults 
 	    	$.extend(this.config.overlay, {
@@ -115,6 +104,9 @@
 					,opacity		: 0.5
 				}	
 			});
+	    	
+	    	// store for repeated functions
+	    	this.memoize = {};
 			
 			// Setup the board
 			this.setup();
@@ -124,6 +116,8 @@
 			
 			// OK
 			this.$elem.trigger('initComplete');
+			if(this.config.load)
+				this.$elem.trigger('reload');
 	    }
 /*
  * HTML fill functions
@@ -892,6 +886,16 @@
 			wrap.append(form);
 			return wrap;
 		}
+		,scrollbarWidth : function() {
+    	    var div = $('<div style="width:50px;height:50px;overflow:hidden;position:absolute;top:-200px;left:-200px;"><div style="height:100px;"></div>');
+    	    // Append our div, do our calculation and then remove it
+    	    $('body').append(div);
+    	    var w1 = $('div', div).innerWidth();
+    	    div.css('overflow-y', 'scroll');
+    	    var w2 = $('div', div).innerWidth();
+    	    $(div).remove();
+    	    return (w1 - w2);
+    	}
 		// Notify change by flashing element
 		,flash : function(elem, color, duration) {
 			var highlightBg = color || "#FFFF9C";
@@ -913,6 +917,8 @@
 	    // Prefix class with set prefix
 	    ,p : function(t) {
 	    	if(this.config.prefix) {
+	    		if(this.memoize[t]) 
+	    			return this.memoize[t];
 	    		var a = t.split(' ');
 	    		for (var i = 0; i < a.length; i++) {
     			  var m = /^([\.#])?(.+)/.exec(a[i]);
@@ -922,7 +928,8 @@
     				  a[i] = this.config.prefix + a[i]; 
     			  }
     			}
-	    		return a.join(' ');
+	    		this.memoize[t] = a.join(' ');
+	    		return this.memoize[t];
 	    	}
 	    	return t;
 	    }
@@ -936,7 +943,6 @@
 		return this.each(function () {
 			if (!$.data(this, 'plugin_kanban')) {
 				$.data(this, 'plugin_kanban', new Kanban(this, options).init());
-				$(this).trigger('reload');
 			}
 		});
 	}
