@@ -937,8 +937,7 @@
 	
 	Kanban.defaults = Kanban.prototype.defaults;
 
-	// A really lightweight plugin wrapper around the constructor,
-	// preventing against multiple instantiations
+	// preventing multiple instantiations
 	$.fn.kanban = function ( options ) {
 		return this.each(function () {
 			if (!$.data(this, 'plugin_kanban')) {
