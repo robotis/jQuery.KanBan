@@ -6,7 +6,7 @@
  * <jtm@hi.is>
  * */
 ;(function($, window, document, undefined){	
-	var Kanban = function(elem, options){
+	var Kanban = function(elem, options) {
 		this.elem = elem;
 		this.$elem = $(elem);
 		this.options = options;
@@ -60,20 +60,18 @@
 				,reload:		true
 				,search:		true
 			}
-			,edit_board:	false
+			,load:			true
+			,edit_board:	true
 			,edit_form:		null
 			,user_form:		null
 			,custom_actions: {}
 			,gutter:		0
 	    }
 	    ,init : function() {
+	    	// configuration
 	    	this.config = $.extend({}, this.defaults, this.options, this.metadata);
-	    	var kanban = this;
-	    	var action = this.p('.action');
-			var queue  = this.p('.queue');
-			var task   = this.p('.task');
-			var add	   = this.p('.add');
-    	
+	    	
+	    	// Kanban ID
 	    	if(!this.config.id) {
 	    		this.config.id = this.$elem.attr('id');
 				if(!this.config.id) {
@@ -89,18 +87,9 @@
 				,reload:	{'icon': '↺', 'trigger': 'reload'}
 			};
 	    	
-	    	if(!this.config.width) this.config.width = this.$elem.width();
-	    	function scrollbarWidth() {
-	    	    var div = $('<div style="width:50px;height:50px;overflow:hidden;position:absolute;top:-200px;left:-200px;"><div style="height:100px;"></div>');
-	    	    // Append our div, do our calculation and then remove it
-	    	    $('body').append(div);
-	    	    var w1 = $('div', div).innerWidth();
-	    	    div.css('overflow-y', 'scroll');
-	    	    var w2 = $('div', div).innerWidth();
-	    	    $(div).remove();
-	    	    return (w1 - w2);
-	    	}
-	    	this.config.scrollbarWidth = scrollbarWidth();
+	    	if(!this.config.width) 
+	    		this.config.width = this.$elem.width();
+	    	this.config.scrollbarWidth = this.scrollbarWidth();
 	    	
 	    	// Overlay defaults 
 	    	$.extend(this.config.overlay, {
@@ -115,6 +104,9 @@
 					,opacity		: 0.5
 				}	
 			});
+	    	
+	    	// store for repeated functions
+	    	this.memoize = {};
 			
 			// Setup the board
 			this.setup();
@@ -124,6 +116,8 @@
 			
 			// OK
 			this.$elem.trigger('initComplete');
+			if(this.config.load)
+				this.$elem.trigger('reload');
 	    }
 /*
  * HTML fill functions
@@ -168,7 +162,7 @@
 			return elm;
 	    }
 		,fill_user_img : function(user) {
-			return (user.src)
+			return (user && user.src)
 				? this.config.img_dir + user.src
 				: this.config.def_user_img;
 		}
@@ -209,13 +203,15 @@
 			head.append(kanban.fill_priority(data.priority));
 			head.append($('<span>', {'class' : kanban.p('task_title')}).html(data.title));
 			var foot = $('<div>', {'class' : kanban.p('users')});
-			var ul = $('<ul>', {'class' : kanban.p('userlist')});
-			$.each(data['users'], function(i, user) {
-				if(i < 5) {
-					ul.append(kanban.fill_user(user));
-				}
-			});
-			foot.append(ul);
+			if(data.users) {
+				var ul = $('<ul>', {'class' : kanban.p('userlist')});
+				$.each(data['users'], function(i, user) {
+					if(i < 5) {
+						ul.append(kanban.fill_user(user));
+					}
+				});
+				foot.append(ul);
+			}
 			task.append(head);
 			task.append(foot);
 		}
@@ -232,21 +228,12 @@
 			kanban.fill_task_inner(task, data);
 			if(this.can_edit()) {
 				task.droppable({ 
-					hoverClass: kanban.p('drophover'),
-					accept: kanban.p('.user'),
-					drop: function(e, u) {
-						var task = $(this);
-						var drag = u.draggable.find('img');
-						var send = {};
-						send['request'] = 'add_user';
-						send['task'] = task.attr('id');
-						send['user'] = drag.attr('rel');
-						kanban.request(send, function(data) {
-							task.find(kanban.p('.userlist')).append(kanban.fill_user(data));
-							kanban.flash(task, "#2A2");
-						}, function() {
-							kanban.flash(task, "#F00");
-						});
+					hoverClass: kanban.p('drophover')
+					,accept: kanban.p('.user')
+					,drop: function(e, u) {
+						var task = $(this).attr('id');
+						var uid = u.draggable.find('img').attr('rel');
+						kanban.$elem.trigger('add_user', {'uid': uid, 'tid': task});
 					}
 				});
 			}
@@ -573,7 +560,7 @@
 			        'move_task', 'drop_user', 'set_priority', 
 			        'add_filter', 'new_task', 'show_form',
 			        'filter_form', 'reload_users', 'reload_queue',
-			        'reload_task'], function(i, b) {
+			        'reload_task', 'add_user'], function(i, b) {
 				elem.bind(b, function(e, options) { 
 					console.log("Trigger: " + b);
 					kanban[b](options); 
@@ -657,40 +644,45 @@
 	    		queues.empty().html($('<div>', {'class' : kanban.p('loading')}));
 	    	
 			kanban.request({'request':'fetch_all'}, function(data) {
-				var colId = 1;
-				if($.inArray('task', options) > -1) {
-					$.each(kanban.config.columns, function() {
-						var queue = $(kanban.p('#column_') + colId).empty();
-						var wid = queue.width();
-						if(data["column_" + colId]) {
-							$.each(data["column_" + colId], function(i, t) {
-								queue.append(kanban.fill_task(t, wid));
-							});
-						}
-						colId++;
-					});
-				}
-				if($.inArray('user', options) > -1 && data.users) {
-					userlist.empty();
-		    		$.each(data.users, function(i, user) {
-		    			if(!kanban.current_user && user.uid === kanban.config.user_uid) {
-		    				kanban.current_user = user;
-		    			}
-		    			userlist.append(kanban.fill_ul_user(user));
-		    		});
-				}
-				if($.inArray('filter', options) > -1) {
-					filters.empty();
-					if(data.filters) {
-						filters.show();
-						$.each(data.filters, function(i, ft) {
-							filters.append(kanban.fill_filter(ft));
+				if(data) {
+					var colId = 1;
+					if($.inArray('task', options) > -1) {
+						$.each(kanban.config.columns, function() {
+							var queue = $(kanban.p('#column_') + colId).empty();
+							var wid = queue.width();
+							if(data["column_" + colId]) {
+								$.each(data["column_" + colId], function(i, t) {
+									queue.append(kanban.fill_task(t, wid));
+								});
+							}
+							colId++;
 						});
-					} else {
-						filters.hide();
 					}
-				}
-				kanban.resize();	
+					if($.inArray('user', options) > -1 && data.users) {
+						userlist.empty();
+			    		$.each(data.users, function(i, user) {
+			    			if(!kanban.current_user && user.uid === kanban.config.user_uid) {
+			    				kanban.current_user = user;
+			    			}
+			    			userlist.append(kanban.fill_ul_user(user));
+			    		});
+					}
+					if($.inArray('filter', options) > -1) {
+						filters.empty();
+						if(data.filters) {
+							filters.show();
+							$.each(data.filters, function(i, ft) {
+								filters.append(kanban.fill_filter(ft));
+							});
+						} else {
+							filters.hide();
+						}
+					}
+					kanban.resize();	
+				} 
+			}, function(error) {
+				queues.empty();
+				alert(error);
 			});
 		}
 		,drop_filter : function(options) {
@@ -733,15 +725,20 @@
 		,new_task : function(options) {
 			this.$elem.trigger('onNewTask');
 			var kanban = this;
+			var uid = (kanban.current_user)
+				? kanban.current_user.uid
+				: 'unknown';
 			var send = {
 				'request': 	'new_task'
 				,'column': 	options.qid
-				,'uid':		kanban.current_user.uid
+				,'uid':		uid
 			};
 			kanban.request(send, function(data) {
-				$('ul#' + options.qid).prepend(
-					kanban.fill_task(data)
-				);
+				if(data) {
+					$('ul#' + options.qid).prepend(
+						kanban.fill_task(data)
+					);
+				}
 			});
 		}
 		,move_task : function(options) {
@@ -750,6 +747,21 @@
 				'request': 'move',
 				'task': options.tid,
 				'column': options.qid
+			});
+		}
+		,add_user : function(options) {
+			var kanban = this;
+			var send = {
+				'request': 'add_user'
+				,'task': options.tid
+				,'user': options.uid
+			};
+			var task = $('#' + options.tid);
+			kanban.request(send, function(data) {
+				task.find(kanban.p('.userlist')).append(kanban.fill_user(data));
+				kanban.flash(task, "#2A2");
+			}, function(data) {
+				kanban.flash(task, "#F00");
 			});
 		}
 		,drop_user : function(options) {
@@ -788,8 +800,13 @@
 							alert(data.error);
 						}
 					} else {
-						if(callback && typeof(callback) == 'function') 
-							callback(data);
+						if(callback && typeof(callback) == 'function') {
+							if(data) {
+								callback(data);
+							} else {
+								alert('Received empty reponce');
+							}
+						}
 					}
 				}
 			});
@@ -869,6 +886,16 @@
 			wrap.append(form);
 			return wrap;
 		}
+		,scrollbarWidth : function() {
+    	    var div = $('<div style="width:50px;height:50px;overflow:hidden;position:absolute;top:-200px;left:-200px;"><div style="height:100px;"></div>');
+    	    // Append our div, do our calculation and then remove it
+    	    $('body').append(div);
+    	    var w1 = $('div', div).innerWidth();
+    	    div.css('overflow-y', 'scroll');
+    	    var w2 = $('div', div).innerWidth();
+    	    $(div).remove();
+    	    return (w1 - w2);
+    	}
 		// Notify change by flashing element
 		,flash : function(elem, color, duration) {
 			var highlightBg = color || "#FFFF9C";
@@ -880,7 +907,7 @@
 			if(task) {
 				return (this.current_user.uid === task.owner);
 			} 
-			return (this.edit_board === true);
+			return (this.config.edit_board === true);
 		}
 		// Localization
 	    ,b : function(t) {
@@ -890,6 +917,8 @@
 	    // Prefix class with set prefix
 	    ,p : function(t) {
 	    	if(this.config.prefix) {
+	    		if(this.memoize[t]) 
+	    			return this.memoize[t];
 	    		var a = t.split(' ');
 	    		for (var i = 0; i < a.length; i++) {
     			  var m = /^([\.#])?(.+)/.exec(a[i]);
@@ -899,7 +928,8 @@
     				  a[i] = this.config.prefix + a[i]; 
     			  }
     			}
-	    		return a.join(' ');
+	    		this.memoize[t] = a.join(' ');
+	    		return this.memoize[t];
 	    	}
 	    	return t;
 	    }
@@ -907,13 +937,11 @@
 	
 	Kanban.defaults = Kanban.prototype.defaults;
 
-	// A really lightweight plugin wrapper around the constructor,
-	// preventing against multiple instantiations
+	// preventing multiple instantiations
 	$.fn.kanban = function ( options ) {
 		return this.each(function () {
 			if (!$.data(this, 'plugin_kanban')) {
 				$.data(this, 'plugin_kanban', new Kanban(this, options).init());
-				$(this).trigger('reload');
 			}
 		});
 	}

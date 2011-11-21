@@ -11,6 +11,7 @@
 	-webkit-border-radius: 5px; 
 	border-radius: 5px; 
 	overflow: hidden; 
+	margin: 6px;
 }
 .kb_column { overflow: hidden; float: left; display: inline; }
 .kb_row { margin: 0 auto; overflow: hidden; }
