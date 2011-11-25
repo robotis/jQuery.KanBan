@@ -81,6 +81,7 @@
 				}
 			}
 	    	
+	    	// FIXME
 	    	this.config.default_actions = {
 				new_user: 	{'icon': '⊞', 'trigger': 'show_form', 'trigger_options': {'type': 'user_form'}, 'text': 'New user'}
 				,filter:  	{'icon': '☰', 'trigger': 'show_form', 'trigger_options': {'type': 'filter_form'}, 'text': 'Filter'}
@@ -184,6 +185,9 @@
 			this.$elem.append($('<div>', {'class' : kanban.p('overlay')}));
 			kanban.resize();
 		}
+	    /**
+	     * Bind events.
+	     */
 		,set_events : function() {
 			var kanban = this;
 			var elem = kanban.$elem;
@@ -211,8 +215,9 @@
 		}
 		 /**
 		 * Resize
-		 * send: 		{?}
-		 * expect: 		{?}
+		 * triggers: 	onResize
+		 * send: 		null
+		 * expect: 		null
 		 * */
 		,resize: function(options) {
 			this.$elem.trigger('onResize');
@@ -400,7 +405,11 @@
 		/**
 		 * Move task to another queue
 		 * triggers: 	onNewTask
-		 * send: 		{column: target queue id, value: user id}
+		 * send: 		{ 
+		 * 					request: new_task,
+		 * 					column: target queue id, 
+		 * 				  	value: user id
+		 * 				}
 		 * expect: 		{full task detail}
 		 * */
 		,new_task : function(options) {
