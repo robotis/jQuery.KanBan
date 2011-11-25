@@ -40,6 +40,7 @@
 	z-index: 99999 !important;
 	width: 690px;
 	min-height: 200px;
+	max-height: 600px;
 	overflow: auto;
 	background: white;
 	padding-bottom: 10px;
@@ -73,10 +74,10 @@
 /*
 	HEADER
 */
-.kanban div#kb_header { height: 32px; background-color: #003D4D; clear: both; padding: 3px; overflow: hidden; }
-.kanban div#kb_header .kb_header_search { float: right; margin: 3px 8px 0 0; position: relative; z-index: 1; }
-.kanban div#kb_header .kb_header_search #kb_search { /*height: 30px;*/ } 
-.kanban div#kb_header .kb_header_search_submit {
+.kanban #kb_header { height: 32px; background-color: #003D4D; clear: both; padding: 3px; overflow: hidden; }
+.kanban .kb_header_search { float: right; margin: 3px 8px 0 0; position: relative; z-index: 1; }
+.kanban .kb_header_search #kb_search { /*height: 30px;*/ } 
+.kanban .kb_header_search_submit {
 	cursor: pointer;
   	background-color: transparent;
     border: medium none;
@@ -93,6 +94,17 @@
     top: 0;
     z-index: 2;
     background: url(ikons/srch_24.png) center no-repeat;
+}
+.kanban div#kb_header .kb_title .kb_kanban_icon { float: left; }
+.kanban div#kb_header .kb_title .kb_name { 
+	color: #E3E3E3;
+    float: left;
+    font-size: 1.5em;
+    font-weight: bold;
+    line-height: 33px;
+    margin-right: 5px;
+    text-decoration: none;
+    text-shadow: 0 1px rgba(0, 0, 0, 0.4);
 }
 .kb_action, div.kb_filter { float: left; margin-right: 5px; position: relative; margin-top: 1px; }
 .kb_filter { padding-left: 3px; }
@@ -136,7 +148,8 @@ div#kb_filters .kb_btn {
 	USERLIST
 */
 .kanban div#kb_user_list,
-.kanban div#kb_filters {
+.kanban div#kb_filters,
+.kanban div#kb_actions	 {
 	background-color: #003D4D;
     height:				34px;
 	clear: both;

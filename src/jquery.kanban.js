@@ -44,6 +44,7 @@
 	Kanban.prototype = {
 		defaults: {
 	    	main_class: 	'kanban'
+	    	,board_name:	''
 	    	,user_uid: 		''			// Current user
 	    	,prefix:		'kb_'
 			,id: 			''
@@ -148,11 +149,18 @@
 	    	var kanban = this;
 			var elm = kanban.fill_user(user, kanban.p('user'), true, function() {
 				var user = $(this).find('img').attr('rel');
-				kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
+				var send = {
+					'request': 	'fetch_task'
+					,'id':		user
+				};
+				kanban.request(send, function(data) {
+					kanban.$elem.trigger('show_form', {'type': 'edit_user_form', 'data': data});
+				});
 			});
 			elm.mousedown(function(e) {
 				if(e.which === 3) {
-					// Edit user
+					var user = $(this).find('img').attr('rel');
+					kanban.$elem.trigger('add_filter', {type: 'user', 'val': user});
 					return false;
 				}
 			}).bind('contextmenu', function(e) {
@@ -188,7 +196,7 @@
 					connectWith: [kanban.p('.queue_inner')]
 					,items: 'li.' + kanban.p('task') + ':not(.ui-state-disabled)'
 					,receive: function(event, ui) {
-						kanban.$elem.trigger('move_task', {tid: ui.item.attr('id'), qid: $(this).attr('id')});
+						kanban.$elem.trigger('move_task', {tid: ui.item.attr('rel'), qid: $(this).attr('id')});
 					}
 				});
 			}
@@ -219,8 +227,9 @@
 	    	var config = this.config;
 	    	var kanban = this;
 			var task = $('<li>', {
-				'class' : 	kanban.p('task')
-				,'id' : 	data.id
+				'class' : kanban.p('task')
+				,'id' : kanban.p('task') + '_' + data.id
+				,'rel': data.id
 			});
 			if(data.type) {
 				task.addClass(kanban.p('type_') + data.type);
@@ -231,9 +240,8 @@
 					hoverClass: kanban.p('drophover')
 					,accept: kanban.p('.user')
 					,drop: function(e, u) {
-						var task = $(this).attr('id');
 						var uid = u.draggable.find('img').attr('rel');
-						kanban.$elem.trigger('add_user', {'uid': uid, 'tid': task});
+						kanban.$elem.trigger('add_user', {'uid': uid, 'tid': data.id});
 					}
 				});
 			}
@@ -249,12 +257,13 @@
 			if(qwid < 180) task.find(kanban.p('.userlist')).hide();
 			return task;
 		}
-		,fill_priority : function(priority) {
+		,fill_priority : function(priority, cls) {
 			var e = this.config.prioritys[priority];
-			if(!e) return null;
-			var p = $('<div>', {'class' : this.p('task_priority')});
-			if(e.color) p.css('background-color', e.color);
-			if(e['class']) p.addClass(e['class']);
+			var p = (cls) 
+				? $('<div>', {'class' : cls})
+				: $('<div>', {'class' : this.p('task_priority')});
+			if(e && e.color) p.css('background-color', e.color);
+			if(e && e['class']) p.addClass(e['class']);
 			return p;
 		}
 		,fill_filter : function(filter) {
@@ -316,6 +325,9 @@
 /*
  * Forms
  * */
+		,edit_user_form : function(user) {
+			
+		}
 		,edit_form : function(task) {
 			var kanban = this;
 			var mdiv = $('<div>', {'class' : kanban.p('task_main')});
@@ -348,8 +360,9 @@
 			// Priority
 			var ps = $('<div>', {'class': kanban.p('prioritys_current')});
 			var inner = $('<div>', {'class': kanban.p('priority')});
-			inner.append($('<div>', {'class': 'show', 'id': kanban.p('current_priority')})
-						.css("background-color", kanban.config.prioritys[task.priority].color));
+			var show = kanban.fill_priority(task.priority, 'show');
+			show.attr('id', kanban.p('current_priority'));
+			inner.append(show);
 			ps.append(inner);
 			mdiv.append(ps);
 			
@@ -387,7 +400,6 @@
 			$.each(task.comments, function(i, comment) {
 				cdiv.append(kanban.fill_comment(comment));
 			});
-			div.append(cdiv);
 			div.append(kanban.overlay_input(
 				$('<textarea>', {'id': kanban.p('add_comment'), rel: task.id, 'class': kanban.p('empty_input clickable')}).val(kanban.b('Add comment')), '', 
 					function(from) {	
@@ -399,14 +411,14 @@
 							,'value': 	from.val()
 						};
 						kanban.request(send, function(data) {
-							cdiv.append(kanban.fill_comment({'body': from.val()}));
+							cdiv.prepend(kanban.fill_comment({'body': from.val()}));
 							from.val('');
 						});
 					}, 
 				    '<textarea>'
 				)
 			);
-			
+			div.append(cdiv);
 			mdiv.append(div);
 			// Sidebar
 			var sidebar = $('<div>', {'class' : kanban.p('sidebar')});
@@ -424,7 +436,6 @@
 			});
 			users.append(ul);
 			sidebar.append(users);
-			
 			if(this.can_edit(task)) {
 				// Actions
 				sidebar.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Actions')));
@@ -434,17 +445,24 @@
 				}, 'text': kanban.b('Set priority')}));
 				var ps = $('<div>', {'class': kanban.p('prioritys')});
 				$.each(kanban.config.prioritys, function(i, v) {
-					var inner = $('<div>', {'class': kanban.p('priority'), 'rel': v.color});
-					inner.append($('<div>', {'class': 'show'}).css("background-color", v.color));
-					inner.click(function() {
-						var color = $(this).attr("rel");
-						$(kanban.p('#current_priority')).css("background-color", color);
-						kanban.$elem.trigger('set_priority', {tid: task.id, priority: i});
-					});
-					ps.append(inner);
+					if(v.color) {
+						var inner = $('<div>', {'class': kanban.p('priority'), 'rel': v.color});
+						inner.append($('<div>', {'class': 'show'}).css("background-color", v.color));
+						inner.click(function() {
+							var color = $(this).attr("rel");
+							$(kanban.p('#current_priority')).css("background-color", color);
+							kanban.$elem.trigger('set_priority', {tid: task.id, priority: i});
+						});
+						ps.append(inner);
+					}
 				});
 				sidebar.append(ps.hide());
-				sidebar.append(kanban.fill_action({'key': 'resolve', 'icon': '◧', 'text': kanban.b('Resolve')}));
+				sidebar.append(kanban.fill_action({'key': 'resolve', 'icon': '◧', 'text': kanban.b('Resolve'), 'action': function() {
+					if(confirm(kanban.b('Resolve task ?'))) {
+						kanban.$elem.trigger('resolve', {tid: task.id});
+						$('#' + kanban.p("overlay")).overlay().close();
+					}
+				}}));
 			}
 			mdiv.append(sidebar);
 			return mdiv;
@@ -497,22 +515,16 @@
 	    	var kanban = this;
 			var header = $('<div>', {'id' : kanban.p('header'), 'class': kanban.p('row')});
 			
-			$.each(kanban.config.default_actions, function(i, action) {
-				if(action && kanban.config.actions[i] === true) {
-					action.key = i;
-					action.text = kanban.b(action.text);
-					header.append(kanban.fill_action(action));
-				}
-			});
+			var title = $('<div>', {'class': kanban.p('title')});
+			title.append($('<span>', {'class': kanban.p('kanban_icon icon')}).text('⥮'));
+			title.append($('<div>', {'class': kanban.p('name')}).text(kanban.config.board_name));
+			header.append(title);
 			
-			$.each(kanban.config.custom_actions, function(i, action) {
-				if(action) {
-					action.key = i;
-					header.append(kanban.fill_action(action));
-				}
-			});
-			
-			if(kanban.config.search) {
+			var action = kanban.config.default_actions.reload;
+			action.key = 'reload';
+			action.text = kanban.b(action.text);
+			header.append(kanban.fill_action(action));
+			if(kanban.config.actions.search) {
 				var search = $('<form>', {'class' : kanban.p('header_search')});
 				search.append($('<input>', {'type': 'text', 'name': 'search', 'id': kanban.p('search')}));
 				search.append($('<input>', {'type': 'submit', 'value': '','class': kanban.p('header_search_submit')}));
@@ -523,8 +535,22 @@
 				});
 				header.append(search);
 			}
-			
 			this.$elem.append(header);
+			var actions = $('<div>', {'id' : kanban.p('actions'), 'class': kanban.p('row')});
+			$.each(kanban.config.default_actions, function(i, action) {
+				if(action && kanban.config.actions[i] === true && i != 'reload') {
+					action.key = i;
+					action.text = kanban.b(action.text);
+					actions.append(kanban.fill_action(action));
+				}
+			});
+			$.each(kanban.config.custom_actions, function(i, action) {
+				if(action) {
+					action.key = i;
+					actions.append(kanban.fill_action(action));
+				}
+			});
+			this.$elem.append(actions);
 			
 			var userlist 	= $('<div>', {'id' : kanban.p('user_list'), 'class': kanban.p('row')});
 			var ur 			= $('<div>', {'class' : kanban.p('users')});
@@ -560,7 +586,7 @@
 			        'move_task', 'drop_user', 'set_priority', 
 			        'add_filter', 'new_task', 'show_form',
 			        'filter_form', 'reload_users', 'reload_queue',
-			        'reload_task', 'add_user'], function(i, b) {
+			        'reload_task', 'add_user', 'resolve'], function(i, b) {
 				elem.bind(b, function(e, options) { 
 					console.log("Trigger: " + b);
 					kanban[b](options); 
@@ -574,6 +600,11 @@
 /**
  * Triggers
  */
+		 /**
+		 * Resize
+		 * send: 		{?}
+		 * expect: 		{?}
+		 * */
 		,resize: function(options) {
 			this.$elem.trigger('onResize');
 	    	var cc = this.config.columns.length; 
@@ -600,6 +631,11 @@
 	    		this.$elem.find(this.p('.task .userlist')).show();
 	    	}
 	    }
+		 /**
+		 * Reload queue
+		 * send: 		{?}
+		 * expect: 		{?}
+		 * */
 	    ,reload_queue : function(options) {
 	    	var kanban = this;
 	    	var queue = $(kanban.p('#column_') + options.id);
@@ -614,15 +650,25 @@
 				}
 	    	});
 	    }
+	    /**
+		 * Reload task
+		 * send: 		{?}
+		 * expect: 		{?}
+		 * */
 	    ,reload_task : function(options) {
 	    	var kanban = this;
-	    	var task = $('#' + options.id);
+	    	var task = $(kanban.p('#task_') + options.id);
 	    	task.empty().html($('<div>', {'class' : kanban.p('loading')}));
 	    	kanban.request({'request':'fetch_task', 'id': options.id}, function(data) {
 	    		task.empty();
 	    		kanban.fill_task_inner(task, data);
 	    	});
 	    }
+	    /**
+		 * Reload users
+		 * send: 		{?}
+		 * expect: 		{?}
+		 * */
 	    ,reload_users : function(options) {
 	    	var kanban = this;
 	    	var userlist = $(kanban.p('#header_users'));
@@ -633,6 +679,11 @@
 	    		});
 	    	});
 	    }
+	    /**
+		 * Reload everthing
+		 * send: 		{?}
+		 * expect: 		{?}
+		 * */
 		,reload : function(options) {
 	    	this.$elem.trigger('onReload');
 	    	var kanban 		= this;
@@ -685,6 +736,11 @@
 				alert(error);
 			});
 		}
+		/**
+		 * Drop filter
+		 * send: 		{?}
+		 * expect: 		{?}
+		 * */
 		,drop_filter : function(options) {
 			this.$elem.trigger('onDropFilter');
 			var kanban = this;
@@ -696,6 +752,11 @@
 				kanban.$elem.trigger('reload', [['task', 'filter']]);
 			});
 		}
+		/**
+		 * Add filter
+		 * send: 		{?}
+		 * expect: 		{?}
+		 * */
 		,add_filter : function(options) {
 			this.$elem.trigger('onAddFilter');
 			var kanban = this;
@@ -714,6 +775,11 @@
 				kanban.$elem.trigger('reload', [['task']]);
 			});
 		}
+		/**
+		 * Show form
+		 * send: 		{?}
+		 * expect: 		null
+		 * */
 		,show_form : function(options) {
 			var kanban = this;
 			kanban.trigger_overlay(false, function() {
@@ -722,6 +788,12 @@
 					: kanban[options.type](options.data);
 			});
 		}
+		/**
+		 * Move task to another queue
+		 * triggers: 	onNewTask
+		 * send: 		{column: target queue id, value: user id}
+		 * expect: 		{full task detail}
+		 * */
 		,new_task : function(options) {
 			this.$elem.trigger('onNewTask');
 			var kanban = this;
@@ -741,6 +813,12 @@
 				}
 			});
 		}
+		/**
+		 * Move task to another queue
+		 * triggers: 	onMove
+		 * send: 		{id: task id, value: target queue id}
+		 * expect: 		null
+		 * */
 		,move_task : function(options) {
 			this.$elem.trigger('onMove');
 			this.request({
@@ -749,6 +827,11 @@
 				'column': options.qid
 			});
 		}
+		/**
+		 * Add user to task
+		 * send: 		{id: task id, value: user to add}
+		 * expect: 		{full user detail}
+		 * */
 		,add_user : function(options) {
 			var kanban = this;
 			var send = {
@@ -756,7 +839,7 @@
 				,'task': options.tid
 				,'user': options.uid
 			};
-			var task = $('#' + options.tid);
+			var task = $(kanban.p('#task_') + options.tid);
 			kanban.request(send, function(data) {
 				task.find(kanban.p('.userlist')).append(kanban.fill_user(data));
 				kanban.flash(task, "#2A2");
@@ -764,6 +847,12 @@
 				kanban.flash(task, "#F00");
 			});
 		}
+		/**
+		 * Drop user from task
+		 * triggers: 	onDropUser
+		 * send: 		{id: task id, value: user to drop}
+		 * expect: 		null
+		 * */
 		,drop_user : function(options) {
 			this.$elem.trigger('onDropUser');
 			this.request({
@@ -771,6 +860,12 @@
 				'task': options.tid
 			});
 		}
+		/**
+		 * Set task priority
+		 * triggers: 	onSetPriority
+		 * send: 		{id: task id, value: priority to set}
+		 * expect: 		{id: task id}
+		 * */
 		,set_priority : function(options) {
 			this.$elem.trigger('onSetPriority');
 			var kanban = this;
@@ -780,6 +875,22 @@
 				,'value': 	options.priority
 			}, function(data) {
 				kanban.$elem.trigger('reload_task', {id: options.tid});
+			});
+		}
+		/**
+		 * Resolve task.
+		 * triggers: 	onResolve
+		 * send: 		{id: task id}
+		 * expect: 		{id: queue_id}
+		 * */
+		,resolve : function(options) {
+			this.$elem.trigger('onResolve');
+			var kanban = this;
+			this.request({
+				'request': 	'resolve'
+				,'id': 		options.tid
+			}, function(data) {
+				kanban.$elem.trigger('reload_queue', {id: data.qid});
 			});
 		}
 /*
@@ -801,11 +912,7 @@
 						}
 					} else {
 						if(callback && typeof(callback) == 'function') {
-							if(data) {
-								callback(data);
-							} else {
-								alert('Received empty reponce');
-							}
+							callback(data);
 						}
 					}
 				}
