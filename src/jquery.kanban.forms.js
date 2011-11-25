@@ -1,5 +1,5 @@
 /**
- * Kanban English Translation
+ * Kanban Forms
  * jtm@hi.is Univercity of Iceland
  * Licensed under the MIT:
  * http://www.opensource.org/licenses/mit-license.php
