@@ -1,11 +1,10 @@
-;(function($){
 /**
- * Kanban Icelandic Translation
+ * Kanban English Translation
  * jtm@hi.is Univercity of Iceland
- * Dual licensed under the MIT and GPL licenses:
+ * Licensed under the MIT:
  * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
 **/
+;(function($){
 	Kanban.prototype.babel = {
 		'New user' : 'Nýr notandi'
 		,'Filter': 'Sía'
