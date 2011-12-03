@@ -19,6 +19,8 @@
 		,'Set priority': 'Setja merkingu'
 		,'Resolve': 'Leysa'
 		,'Members': 'Aðilar'
+		,'Tags': 'Tög'
+		,'Add Tag': 'Bæta við tagi'
 	}
 
 })(jQuery);

@@ -108,7 +108,8 @@
 }
 .kb_action, div.kb_filter { float: left; margin-right: 5px; position: relative; margin-top: 1px; }
 .kb_filter { padding-left: 3px; }
-.kb_action .kb_btn, div.kb_filter .kb_btn {
+.kb_action .kb_btn, 
+div.kb_filter .kb_btn {
 	padding: 0 8px 0 0;
 	border-radius: 3px 3px 3px 3px;
     color: #E3E3E3;
@@ -207,6 +208,7 @@ div#kb_filters .kb_btn {
 */
 .kb_overlay hr { color: #DDD; background-color: #DDD; box-shadow: 0 1px 3px #D3D3D3; }
 .kb_overlay a {text-decoration: none; font-size: 1.1em; }
+.kb_overlay .kb_btn a { color: #444; font-size: 1em; }
 .kb_separator { clear: both; font-size: 1.1em; color: #888; padding-top: 5px; }
 /*
 	Form sidebar
@@ -271,6 +273,11 @@ div#kb_filters .kb_btn {
 .kb_comment { clear: both; min-height: 35px; }
 .kb_comment .kb_user_img { }
 .kb_comment .kb_comment_body {  font-style: italic; padding-left: 40px; }
+/*
+	Tags
+*/
+.kb_task_tags { width: 95%; }
+.kb_task_tag { padding: 3px 0 3px 3px; font-size: 1.2em !important; }
 /*
 	User images
 */

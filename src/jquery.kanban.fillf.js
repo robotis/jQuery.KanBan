@@ -65,12 +65,12 @@
 			var cID = kanban.p('column_') + colId;
 			var column = $('<div>', {'class' : kanban.p('column queue')});
 			var title = $('<h3>');
-			title.append($('<span>', {'class' : kanban.p('icon')}).html(col.ikon));
+			title.append($('<span>', {'class' : kanban.p('icon')}).html(col.icon));
 			title.append($('<span>', {'class' : kanban.p('h3')}).html(col.name));
 			if(this.can_edit()) {
 				title.append($('<span>', {'class' : kanban.p('icon add clickable'), 
 								   	  	  'rel' : cID, 'title': kanban.b('Create new task in this queue')}
-				).html(col.add_ikon).click(function() { 
+				).html(col.add_icon).click(function() { 
 					kanban.$elem.trigger('new_task', {'qid': $(this).attr('rel')});
 				}));
 			}
@@ -174,6 +174,10 @@
 					});
 					btn.append($('<span>', {'class': kanban.p('btn_text')}).append(img));
 					break;
+				default:
+					if(filter.name)
+						btn.append($('<span>', {'class': kanban.p('btn_text')}).append(filter.name));
+					break;
 			}
 			div.append(btn);
 			div.click(function() {
@@ -189,10 +193,14 @@
 			if(action.icon) {
 				btn.append($('<span>', {'class': kanban.p('btn_icon')}).append(action.icon));
 			}
-			var text = (typeof(action.text) != 'string')
-				? kanban.b(action.key)
-				: action.text;
-			if(text) btn.append($('<span>', {'class': kanban.p('btn_text')}).append(text));
+			if(action.url) {
+				btn.append($('<span>', {'class': kanban.p('btn_text')}).append(action.url));
+			} else {
+				var text = (typeof(action.text) != 'string')
+					? kanban.b(action.key)
+					: action.text;
+				if(text) btn.append($('<span>', {'class': kanban.p('btn_text')}).append(text));
+			}
 			act.append(btn);
 			act.click(function() { 
 				if(action.trigger) {
@@ -207,6 +215,16 @@
 			var li = this.fill_user(this.current_user, this.p('comment'));
 			li.append($('<div>').addClass(this.p('comment_body')).text(data.body));
 			return li;
+		}
+		,fill_tag : function(tag, tid) {
+			var kanban = this;
+			var tag = $('<a>', {'class': this.p('task_tag clickable'), 'rel': tid}).text(tag);
+			tag.click(function () {
+				var t = $(this);
+				kanban.$elem.trigger('drop_tag', {'tid': t.attr('rel'), 'tag': t.text()});
+				t.remove();
+			});
+			return tag;
 		}
 	});
 })(jQuery);

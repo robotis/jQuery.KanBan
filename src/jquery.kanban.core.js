@@ -202,9 +202,9 @@
 			        'move_task', 'drop_user', 'set_priority', 
 			        'add_filter', 'new_task', 'show_form',
 			        'filter_form', 'reload_users', 'reload_queue',
-			        'reload_task', 'add_user', 'resolve'], function(i, b) {
+			        'reload_task', 'add_user', 'resolve', 'drop_tag'], function(i, b) {
 				elem.bind(b, function(e, options) { 
-					console.log("Trigger: " + b);
+//					console.log("Trigger: " + b);
 					kanban[b](options); 
 				});
 			});
@@ -382,9 +382,10 @@
 			kanban.request(send, function(data) {
 				$(kanban.p('#filters')).append(
 					kanban.fill_filter({
-						type: options.type, 
-						val: data.val, 
-						filter_id: data.filter_id
+						type: options.type
+						,val: data.val
+						,filter_id: data.filter_id
+						,name: options.name
 				})).show();
 				kanban.$elem.trigger('reload', [['task']]);
 			});
@@ -443,6 +444,19 @@
 				'request': 'move',
 				'task': options.tid,
 				'column': options.qid
+			});
+		}
+		/**
+		 * Drops tag from task
+		 * send: 		{id: task id, value: tag}
+		 * expect: 		null
+		 * */
+		,drop_tag : function(options) {
+			this.$elem.trigger('onMove');
+			this.request({
+				'request': 'drop_tag',
+				'id': options.tid,
+				'value': options.tag
 			});
 		}
 		/**

@@ -91,11 +91,61 @@
 		,edit_form : function(task) {
 			var kanban = this;
 			var mdiv = $('<div>', {'class' : kanban.p('task_main')});
+			
 			// Header
 			var header = $('<div>', {'class' : kanban.p('overlay_header')});
+			kanban.edit_form_header(header, task);
+			mdiv.append(header);
+			
+			// Priority
+			var ps = $('<div>', {'class': kanban.p('prioritys_current')});
+			var inner = $('<div>', {'class': kanban.p('priority')});
+			var show = kanban.fill_priority(task.priority, 'show');
+			show.attr('id', kanban.p('current_priority'));
+			inner.append(show);
+			ps.append(inner);
+			mdiv.append(ps);
+			
+			// Main content
+			var div = $('<div>').addClass(kanban.p('main'));
+			
+			// Description
+			kanban.edit_form_desc(div, task);
+			
+			// Comments
+			kanban.edit_form_comments(div, task);
+			mdiv.append(div);
+			
+			// Sidebar
+			var sidebar = $('<div>', {'class' : kanban.p('sidebar')});
+			kanban.edit_form_members(sidebar, task);
+			kanban.edit_form_tags(sidebar, task);
+			if(this.can_edit(task)) {
+				sidebar.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Actions')));
+				sidebar.append($('<hr>'));
+				kanban.edit_form_prioritys(sidebar, task);
+				sidebar.append(kanban.fill_action({'key': 'resolve', 'icon': '◧', 'text': kanban.b('Resolve'), 'action': function() {
+					if(confirm(kanban.b('Resolve task ?'))) {
+						kanban.$elem.trigger('resolve', {tid: task.id});
+						$('#' + kanban.p("overlay")).overlay().close();
+					}
+				}}));
+			}
+			if(task.url) {
+				var turl = $(task.url);
+				sidebar.append(kanban.fill_action({'key': 'url', 'icon': '◫', 'url': turl}));
+			}
+			mdiv.append(sidebar);
+			return mdiv;
+		}
+		/** 
+		 * Task header
+		 * */
+		,edit_form_header : function(container, task) {
+			var kanban = this;
 			var title = $('<h3>', {'id': kanban.p('set_title'), rel: task.id}).text(task.title);
 			if(this.can_edit(task)) {
-				header.append(kanban.overlay_input(
+				container.append(kanban.overlay_input(
 						title, 
 						task.title, 
 						function(from) {
@@ -113,29 +163,22 @@
 					)
 				);
 			} else {
-				header.append(title);
+				container.append(title);
 			}
-			
-			mdiv.append(header);
-			// Priority
-			var ps = $('<div>', {'class': kanban.p('prioritys_current')});
-			var inner = $('<div>', {'class': kanban.p('priority')});
-			var show = kanban.fill_priority(task.priority, 'show');
-			show.attr('id', kanban.p('current_priority'));
-			inner.append(show);
-			ps.append(inner);
-			mdiv.append(ps);
-			
-			// Main content
-			var div = $('<div>').addClass(kanban.p('main'));
-			div.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Description')));
-			div.append($('<hr>'));
+		}
+		/** 
+		 * Task description
+		 * */
+		,edit_form_desc : function(container, task) {
+			var kanban = this;
+			container.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Description')));
+			container.append($('<hr>'));
 			if(this.can_edit(task)) {
 				var desc = task.body ? task.body : kanban.b('Add description');
 				var delem = task.body
 					? $('<a>', {'id': kanban.p('add_description'), rel: task.id}).text(desc)
 					: $('<textarea>', {'id': kanban.p('add_description'), rel: task.id, 'class': kanban.p('empty_input clickable')}).val(desc);
-				div.append(kanban.overlay_input(
+				container.append(kanban.overlay_input(
 						delem 
 						,desc
 						,function(from) {					
@@ -151,16 +194,21 @@
 				);
 			} else {
 				var desc = task.body ? task.body : kanban.b('No description');
-				div.append($('<a>', {'id': kanban.p('add_description')}).text(desc));
+				container.append($('<a>', {'id': kanban.p('add_description')}).text(desc));
 			}
-			
-			div.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Comments')));
-			div.append($('<hr>'));
+		}
+		/** 
+		 * Task comment section
+		 * */
+		,edit_form_comments : function(container, task) {
+			var kanban = this;
+			container.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Comments')));
+			container.append($('<hr>'));
 			var cdiv = $('<ul>').addClass(kanban.p('comments'));
 			$.each(task.comments, function(i, comment) {
 				cdiv.append(kanban.fill_comment(comment));
 			});
-			div.append(kanban.overlay_input(
+			container.append(kanban.overlay_input(
 				$('<textarea>', {'id': kanban.p('add_comment'), rel: task.id, 'class': kanban.p('empty_input clickable')}).val(kanban.b('Add comment')), '', 
 					function(from) {	
 						var from = $(from);
@@ -178,54 +226,86 @@
 				    '<textarea>'
 				)
 			);
-			div.append(cdiv);
-			mdiv.append(div);
-			// Sidebar
-			var sidebar = $('<div>', {'class' : kanban.p('sidebar')});
-			// Members
-			sidebar.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Members')));
-			sidebar.append($('<hr>'));
+			container.append(cdiv);
+		}
+		/** 
+		 * Task members
+		 * */
+		,edit_form_members : function(container, task) {
+			var kanban = this;
+			container.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Members')));
+			container.append($('<hr>'));
 			var users = $('<div>', {'class' : kanban.p('users')});
 			var ul = $('<ul>', {'class' : kanban.p('userlist')});
-			$.each(task.users, function(i, user) {
-				var u = kanban.fill_user(user, null, false, function() {
-					kanban.$elem.trigger('drop_user', {uid: user.id, tid: task.id});
+			if(task.users) {
+				$.each(task.users, function(i, user) {
+					var u = kanban.fill_user(user, null, false, function() {
+						kanban.$elem.trigger('drop_user', {uid: user.id, tid: task.id});
+					});
+					if(user.uid == task.owner) u.addClass(kanban.p('owner'));
+					ul.append(u);
 				});
-				if(user.uid == task.owner) u.addClass(kanban.p('owner'));
-				ul.append(u);
-			});
-			users.append(ul);
-			sidebar.append(users);
-			if(this.can_edit(task)) {
-				// Actions
-				sidebar.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Actions')));
-				sidebar.append($('<hr>'));
-				sidebar.append(kanban.fill_action({'key': 'set_priority', 'icon': '◱', 'action': function() {
-					$(kanban.p('.prioritys')).toggle();
-				}, 'text': kanban.b('Set priority')}));
-				var ps = $('<div>', {'class': kanban.p('prioritys')});
-				$.each(kanban.config.prioritys, function(i, v) {
-					if(v.color) {
-						var inner = $('<div>', {'class': kanban.p('priority'), 'rel': v.color});
-						inner.append($('<div>', {'class': 'show'}).css("background-color", v.color));
-						inner.click(function() {
-							var color = $(this).attr("rel");
-							$(kanban.p('#current_priority')).css("background-color", color);
-							kanban.$elem.trigger('set_priority', {tid: task.id, priority: i});
-						});
-						ps.append(inner);
-					}
-				});
-				sidebar.append(ps.hide());
-				sidebar.append(kanban.fill_action({'key': 'resolve', 'icon': '◧', 'text': kanban.b('Resolve'), 'action': function() {
-					if(confirm(kanban.b('Resolve task ?'))) {
-						kanban.$elem.trigger('resolve', {tid: task.id});
-						$('#' + kanban.p("overlay")).overlay().close();
-					}
-				}}));
 			}
-			mdiv.append(sidebar);
-			return mdiv;
+			users.append(ul);
+			container.append(users);
+		}
+		/** 
+		 * Task tags
+		 * */
+		,edit_form_tags : function(container, task) {
+			var kanban = this;
+			container.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Tags')));
+			container.append($('<hr>'));
+			if(task.tags) {
+				var div = $('<div>').addClass(kanban.p('task_tags'));
+				$.each(task.tags, function(i, tag) {
+					div.append(kanban.fill_tag(tag, task.id));
+				});
+				if(this.can_edit(task)) {
+					div.append(kanban.overlay_input(
+						$('<input>', {'id': kanban.p('add_tag'), rel: task.id, 'class': kanban.p('empty_input clickable')}).val(kanban.b('Add Tag')), '', 
+							function(from) {	
+								var from = $(from);
+								var send = {
+									'request': 	'add_tag'
+									,'id': 		task.id
+									,'uid':		kanban.current_user.uid
+									,'value': 	from.val()
+								};
+								kanban.request(send, function(data) {
+									div.prepend(kanban.fill_tag(send.value, task.id));
+									from.val('');
+								});
+							}, 
+						    '<input>'
+						)
+					);
+				}
+				container.append(div);
+			}
+		}
+		/** 
+		 * Task prioritys
+		 * */
+		,edit_form_prioritys : function(container, task) {
+			var kanban = this;
+			container.append(kanban.fill_action({'key': 'set_priority', 'icon': '◱', 'action': function() {
+				$(kanban.p('.prioritys')).toggle();
+			}, 'text': kanban.b('Set priority')}));
+			var ps = $('<div>', {'class': kanban.p('prioritys')});
+			$.each(kanban.config.prioritys, function(i, v) {
+				if(v.color) {
+					var inner = $('<div>', {'class': kanban.p('priority'), 'rel': v.color});
+					inner.append($('<div>', {'class': 'show'}).attr('title', v.name).css("background-color", v.color));
+					inner.click(function() {
+						var color = $(this).attr("rel");
+						$(kanban.p('#current_priority')).css("background-color", color);
+						kanban.$elem.trigger('set_priority', {tid: task.id, priority: i});
+					});
+					ps.append(inner);
+				}
+			});
+			container.append(ps.hide());
 		}
 		/** 
 		 * Filters
