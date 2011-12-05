@@ -21,6 +21,7 @@
 		,'Members': 'Aðilar'
 		,'Tags': 'Tög'
 		,'Add Tag': 'Bæta við tagi'
+		,'Resolve task ?': 'Leysa Mál ?'
 	}
 
 })(jQuery);
