@@ -4,23 +4,23 @@
  * Licensed under the MIT:
  * http://www.opensource.org/licenses/mit-license.php
 **/
-;(function($, window, document, undefined){	
+;(function($, window, document){	
+	"use strict";
 	var Kanban = function(elem, options) {
 		this.elem = elem;
 		this.$elem = $(elem);
 		this.options = options;
 		this.metadata = this.$elem.data('plugin-options');
 	};
-	
 	$.fn.exists = function () {
 	    return this.length !== 0;
-	}
+	};
 	$.fn.setCursorPosition = function(position){
-	    if(this.lengh == 0) return this;
+	    if(this.lengh === 0) return this;
 	    return $(this).setSelection(position, position);
-	}
+	};
 	$.fn.setSelection = function(selectionStart, selectionEnd) {
-	    if(this.lengh == 0) return this;
+	    if(this.lengh === 0) return this;
 	    input = this[0];
 
 	    if (input.createTextRange) {
@@ -35,14 +35,14 @@
 	    }
 
 	    return this;
-	}
+	};
 	$.fn.focusEnd = function(){
 	    this.setCursorPosition(this.val().length);
-	}
+	};
 	
 	Kanban.prototype = {
 		defaults: {
-	    	main_class: 	'kanban'
+			main_class: 	'kanban'
 	    	,board_name:	''
 	    	,user_uid: 		''			// Current user
 	    	,prefix:		'kb_'
@@ -178,7 +178,7 @@
 			
 			var columns = $('<div>', {'class' : kanban.p('row')});
 			var colcount = kanban.config.columns.length;
-			for(i=0; i<colcount; i++) {
+			for(var i=0; i<colcount; i++) {
 				columns.append(kanban.fill_queue(i+1, kanban.config.columns[i]));
 			}
 			this.$elem.append(columns);
@@ -198,11 +198,22 @@
 				});
 			});
 			
-			$.each(['reload', 'drop_filter', 'resize',
-			        'move_task', 'drop_user', 'set_priority', 
-			        'add_filter', 'new_task', 'show_form',
-			        'filter_form', 'reload_users', 'reload_queue',
-			        'reload_task', 'add_user', 'resolve', 'drop_tag'], function(i, b) {
+			$.each(['reload'
+			        ,'drop_filter'
+			        ,'resize'
+			        ,'move_task'
+			        ,'drop_user'
+			        ,'set_priority'
+			        ,'add_filter'
+			        ,'new_task'
+			        ,'show_form'
+			        ,'filter_form'
+			        ,'reload_users'
+			        ,'reload_queue'
+			        ,'reload_task'
+			        ,'add_user'
+			        ,'resolve'
+			        ,'drop_tag'], function(i, b) {
 				elem.bind(b, function(e, options) { 
 //					console.log("Trigger: " + b);
 					kanban[b](options); 
@@ -229,7 +240,7 @@
 	    	}
 	    	uwid -= this.config.gutter || 0; // auto-margins
 	    	var width = ((uwid / cc) - margin);
-	    	this.$elem.css({'width': uwid})
+	    	this.$elem.css({'width': uwid});
 	    	if(this.config.gutter) 
 	    		this.$elem.css('margin', this.config.gutter + 'px auto');
 	    	this.$elem.find(this.p('#header')).css('width', uwid);
@@ -359,8 +370,8 @@
 			this.$elem.trigger('onDropFilter');
 			var kanban = this;
 			var send = {
-				'request' : 'drop_filter',
-				'filter' : options.filter_id
+				'request' : 'drop_filter'
+				,'filter' : options.filter_id
 			};
 			this.request(send, function() {
 				kanban.$elem.trigger('reload', [['task', 'filter']]);
@@ -375,9 +386,9 @@
 			this.$elem.trigger('onAddFilter');
 			var kanban = this;
 			var send = {
-				'request' : 'filter',
-				'filter' : options.val,
-				'filter_type' : options.type
+				'request' : 'filter'
+				,'filter' : options.val
+				,'filter_type' : options.type
 			};
 			kanban.request(send, function(data) {
 				$(kanban.p('#filters')).append(
@@ -441,9 +452,9 @@
 		,move_task : function(options) {
 			this.$elem.trigger('onMove');
 			this.request({
-				'request': 'move',
-				'task': options.tid,
-				'column': options.qid
+				'request': 'move'
+				,'task': options.tid
+				,'column': options.qid
 			});
 		}
 		/**
@@ -454,9 +465,9 @@
 		,drop_tag : function(options) {
 			this.$elem.trigger('onMove');
 			this.request({
-				'request': 'drop_tag',
-				'id': options.tid,
-				'value': options.tag
+				'request': 'drop_tag'
+				,'id': options.tid
+				,'value': options.tag
 			});
 		}
 		/**
@@ -488,8 +499,8 @@
 		,drop_user : function(options) {
 			this.$elem.trigger('onDropUser');
 			this.request({
-				'request': 'drop_user',
-				'task': options.tid
+				'request': 'drop_user'
+				,'task': options.tid
 			});
 		}
 		/**
@@ -608,7 +619,7 @@
 				$.data(this, 'plugin_kanban', new Kanban(this, options).init());
 			}
 		});
-	}
+	};
 
 	window.Kanban = Kanban;
-})(jQuery, window , document);
+})(jQuery, window, document);
