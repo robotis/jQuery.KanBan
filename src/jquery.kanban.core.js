@@ -20,8 +20,8 @@
 	    return $(this).setSelection(position, position);
 	};
 	$.fn.setSelection = function(selectionStart, selectionEnd) {
-	    if(this.lengh === 0) return this;
-	    input = this[0];
+	    if(this.length === 0) return this;
+	    var input = this[0];
 
 	    if (input.createTextRange) {
 	        var range = input.createTextRange();

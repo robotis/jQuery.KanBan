@@ -4,7 +4,7 @@
  * Licensed under the MIT:
  * http://www.opensource.org/licenses/mit-license.php
 **/
-;(function($){
+(function($){
 	$.extend(Kanban.prototype, {
 		/**
 		 * Create and show overlay.
@@ -47,16 +47,24 @@
 		,overlay_input : function(elem, text, on_enter, type) {
 			var kanban = this;
 			var id = elem.attr('id');
+			
 			elem.addClass(kanban.p('clickable')).click(function() {
 				// Show other input overs
 				$(kanban.p('.overlay_input')).show();
 				$(this).hide();
 				
 				// Hide other input forms
+//				var e = jQuery.Event("keydown");
+//				e.keyCode = 13;
+//				$(kanban.p('.overlay_input_active')).removeClass(kanban.p('overlay_input_active')).trigger(e);
+				$(kanban.p('.overlay_input_active')).removeClass(kanban.p('overlay_input_active'));
 				$(kanban.p('.overlay_form')).hide();
+				
+				// 
 				$('#' + id + '_form').show();
-				$('#' + id + '_input').focusEnd();
+				$('#' + id + '_input').addClass(kanban.p('overlay_input_active')).focusEnd();
 			}).addClass(kanban.p('overlay_input'));
+			
 			var form = $('<div>', {'id': id + '_form'}).addClass(this.p('overlay_form'));
 			var t = type ? type : '<input>';
 			var input = $(t, {'id': id + '_input'}).keydown(function(e) {
@@ -80,7 +88,6 @@
 			var wrap = $('<div>').addClass(this.p('overlay_input_wrap'));
 			wrap.append(elem);
 			form.append(input);
-//			form.append($('<span class="kb_icon kb_overlay_save" rel="kb_column_2">+</span>'));
 			form.hide();
 			wrap.append(form);
 			return wrap;
@@ -177,7 +184,7 @@
 				var desc = task.body ? task.body : kanban.b('Add description');
 				var delem = task.body
 					? $('<a>', {'id': kanban.p('add_description'), rel: task.id}).text(desc)
-					: $('<textarea>', {'id': kanban.p('add_description'), rel: task.id, 'class': kanban.p('empty_input clickable')}).val(desc);
+					: $('<textarea>', {'id': kanban.p('add_description_input'), rel: task.id, 'class': kanban.p('empty_input clickable')}).val(desc);
 				container.append(kanban.overlay_input(
 						delem 
 						,desc
@@ -187,7 +194,10 @@
 								,'id': 		task.id
 								,'value': 	$(from).val()
 							};
-							kanban.request(send, null);
+							kanban.request(send, function(data) {
+								$('#' + kanban.p('add_description')).text($(from).val());
+								from.val('');
+							});
 						}
 					    ,'<textarea>'
 					)
