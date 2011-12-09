@@ -22,6 +22,7 @@
 		,'Tags': 'Tög'
 		,'Add Tag': 'Bæta við tagi'
 		,'Resolve task ?': 'Leysa Mál ?'
+		,'New Task': 'Nýtt Mál'
 	}
 
 })(jQuery);

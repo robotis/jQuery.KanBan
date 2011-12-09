@@ -47,24 +47,6 @@
 		,overlay_input : function(elem, text, on_enter, type) {
 			var kanban = this;
 			var id = elem.attr('id');
-			
-			elem.addClass(kanban.p('clickable')).click(function() {
-				// Show other input overs
-				$(kanban.p('.overlay_input')).show();
-				$(this).hide();
-				
-				// Hide other input forms
-//				var e = jQuery.Event("keydown");
-//				e.keyCode = 13;
-//				$(kanban.p('.overlay_input_active')).removeClass(kanban.p('overlay_input_active')).trigger(e);
-				$(kanban.p('.overlay_input_active')).removeClass(kanban.p('overlay_input_active'));
-				$(kanban.p('.overlay_form')).hide();
-				
-				// 
-				$('#' + id + '_form').show();
-				$('#' + id + '_input').addClass(kanban.p('overlay_input_active')).focusEnd();
-			}).addClass(kanban.p('overlay_input'));
-			
 			var form = $('<div>', {'id': id + '_form'}).addClass(this.p('overlay_form'));
 			var t = type ? type : '<input>';
 			var input = $(t, {'id': id + '_input'}).keydown(function(e) {
@@ -74,12 +56,11 @@
 					// Propagate
 					return true;
 				} 
-				$('#' + id + '_form').hide();
-				$('#' + id).show();
+				$('#' + id + '_form').click();
 				e.stopImmediatePropagation();
 				return false;
 			}).addClass(this.p('overlay_inner_input'));
-			if(text) {
+			if(text && !elem.hasClass(this.p('default'))) {
 				input.val(text);
 				if(text.length > 250) {
 					input.addClass(this.p('long'));
@@ -90,6 +71,11 @@
 			form.append(input);
 			form.hide();
 			wrap.append(form);
+			this.link_elements(elem, form);
+			form.bind('active', function() {
+				$(kanban.p('.overlay_form')).not('#' + id + '_form').click();
+				$('#' + id + '_input').addClass(kanban.p('overlay_input_active')).focusEnd()
+			});
 			return wrap;
 		}
 		/**
@@ -97,7 +83,7 @@
 		 */
 		,edit_form : function(task) {
 			var kanban = this;
-			var mdiv = $('<div>', {'class' : kanban.p('task_main')});
+			var mdiv = $('<div>', {'id': kanban.p('task_edit_form'), 'class' : kanban.p('task_main')});
 			
 			// Header
 			var header = $('<div>', {'class' : kanban.p('overlay_header')});
@@ -131,7 +117,11 @@
 				sidebar.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Actions')));
 				sidebar.append($('<hr>'));
 				kanban.edit_form_prioritys(sidebar, task);
-				sidebar.append(kanban.fill_action({'key': 'resolve', 'icon': '◧', 'text': kanban.b('Resolve'), 'action': function() {
+				sidebar.append(kanban.fill_action({
+						'key': 'resolve', 
+						'icon': '◧', 
+						'text': kanban.b('Resolve'), 
+						'action': function() {
 					if(confirm(kanban.b('Resolve task ?'))) {
 						kanban.$elem.trigger('resolve', {tid: task.id});
 						$('#' + kanban.p("overlay")).overlay().close();
@@ -151,6 +141,9 @@
 		,edit_form_header : function(container, task) {
 			var kanban = this;
 			var title = $('<h3>', {'id': kanban.p('set_title'), rel: task.id}).text(task.title);
+			if(task.title == kanban.b('New Task')) {
+				title.addClass(kanban.p('default'));
+			}
 			if(this.can_edit(task)) {
 				container.append(kanban.overlay_input(
 						title, 
@@ -181,10 +174,17 @@
 			container.append($('<div>').addClass(kanban.p('separator')).text(kanban.b('Description')));
 			container.append($('<hr>'));
 			if(this.can_edit(task)) {
-				var desc = task.body ? task.body : kanban.b('Add description');
-				var delem = task.body
-					? $('<a>', {'id': kanban.p('add_description'), rel: task.id}).text(desc)
-					: $('<textarea>', {'id': kanban.p('add_description_input'), rel: task.id, 'class': kanban.p('empty_input clickable')}).val(desc);
+				if(task.body) {
+					var desc = task.body;
+					var delem = $('<a>', {'id': kanban.p('add_description'), rel: task.id}).text(desc);
+				} else {
+					var desc = kanban.b('No description');
+					var delem = $('<textarea>', {
+						'id': kanban.p('add_description'), 
+						rel: task.id, 'class': 
+						kanban.p('empty_input clickable default')
+					}).val(desc);
+				}
 				container.append(kanban.overlay_input(
 						delem 
 						,desc
@@ -195,8 +195,7 @@
 								,'value': 	$(from).val()
 							};
 							kanban.request(send, function(data) {
-								$('#' + kanban.p('add_description')).text($(from).val());
-								from.val('');
+								$(kanban.p('#task_edit_form')).replaceWith(kanban.edit_form(data));
 							});
 						}
 					    ,'<textarea>'

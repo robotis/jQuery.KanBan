@@ -434,6 +434,7 @@
 				'request': 	'new_task'
 				,'column': 	options.qid
 				,'uid':		uid
+				,'title':	kanban.b('New Task')
 			};
 			kanban.request(send, function(data) {
 				if(data) {
@@ -580,9 +581,25 @@
 		}
 		,can_edit : function(task) {
 			if(task) {
-				return (this.current_user.uid === task.owner);
+				for(var i = 0; i<task.users.length; i++) {
+					if(this.current_user.uid === task.users[i].uid) {
+						return true;
+					}
+				}
+				return false;
 			} 
 			return (this.config.edit_board === true);
+		}
+		,link_elements : function(elem1, elem2) {
+			var kanban = this;
+			elem1.addClass(kanban.p('clickable')).click(function () {
+				$(this).hide();
+				elem2.show().trigger('active');
+			});
+			elem2.addClass(kanban.p('clickable')).click(function () {
+				$(this).hide();
+				elem1.show().trigger('active');
+			});
 		}
 		// Localization
 	    ,b : function(t) {
