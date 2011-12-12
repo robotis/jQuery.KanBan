@@ -304,8 +304,9 @@
 			var ps = $('<div>', {'class': kanban.p('prioritys')});
 			$.each(kanban.config.prioritys, function(i, v) {
 				if(v.color) {
-					var inner = $('<div>', {'class': kanban.p('priority'), 'rel': v.color});
-					inner.append($('<div>', {'class': 'show'}).attr('title', v.name).css("background-color", v.color));
+					var inner = $('<div>', {'class': kanban.p('priority clickable'), 'rel': v.color});
+					var title = $('<span>', {'class': kanban.p('priority_title')}).text(v.name);
+					inner.append($('<div>', {'class': 'show'}).attr('title', v.name).css("background-color", v.color).append(title));
 					inner.click(function() {
 						var color = $(this).attr("rel");
 						$(kanban.p('#current_priority')).css("background-color", color);
