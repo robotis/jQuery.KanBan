@@ -1,0 +1,31 @@
+{
+    "name": "KanBan",
+    "version": "0.6a",
+    "title": "jQuery.kanban",
+    "author": {
+        "name": "Robotis",
+        "url": "https://github.com/robotis"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "LICENSE"
+        }
+    ],
+    "dependencies": {
+        "jquery": "1",
+        "jquery-ui": "1",
+    },
+    "description": "Jquery Kanban plugin. Create and share tasks.",
+    "keywords": [
+        "kanban",
+        "collaborate",
+        "tasklist"
+    ],
+    "homepage": "https://github.com/robotis/jQuery.KanBan",
+    "contributors": [
+    ],
+    "files": [
+        ""
+    ]
+}
